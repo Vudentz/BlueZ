@@ -33,3 +33,4 @@ gboolean control_is_active(struct btd_service *service);
 
 int control_connect(struct btd_service *service);
 int control_disconnect(struct btd_service *service);
+void control_set_battery_status(struct btd_service *service, uint8_t value);

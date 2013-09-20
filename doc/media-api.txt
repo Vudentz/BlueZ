@@ -116,6 +116,10 @@ Properties
 
 		boolean Connected [readonly]
 
+		string Battery [readonly]
+
+			Possible values: "normal", "warning", "critical",
+			"external", "fullcharge"
 
 MediaPlayer1 hierarchy
 ======================

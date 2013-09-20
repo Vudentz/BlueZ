@@ -475,6 +475,24 @@ static const char *battery_status_to_str(uint8_t status)
 	return NULL;
 }
 
+static uint8_t battery_status_to_percent(uint8_t status)
+{
+	switch (status) {
+	case AVRCP_BATTERY_STATUS_NORMAL:
+		return 75;
+	case AVRCP_BATTERY_STATUS_WARNING:
+		return 20;
+	case AVRCP_BATTERY_STATUS_CRITICAL:
+		return 5;
+	case AVRCP_BATTERY_STATUS_EXTERNAL:
+		return 0;
+	case AVRCP_BATTERY_STATUS_FULL_CHARGE:
+		return 100;
+	}
+
+	return 0;
+}
+
 /*
  * get_company_id:
  *
@@ -3080,6 +3098,16 @@ static void avrcp_track_changed(struct avrcp *session,
 static void avrcp_batt_status_changed(struct avrcp *session,
 						struct avrcp_header *pdu)
 {
+	struct btd_service *service;
+	uint8_t value;
+
+	service = btd_device_get_service(session->dev, AVRCP_REMOTE_UUID);
+	if (service == NULL)
+		return;
+
+	value = battery_status_to_percent(pdu->params[0]);
+
+	control_set_battery_status(service, value);
 }
 
 static void avrcp_setting_changed(struct avrcp *session,
