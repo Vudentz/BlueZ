@@ -3614,6 +3614,11 @@ static void avrcp_playback_pos_changed(struct avrcp *session,
 	media_player_set_position(mp, position);
 }
 
+static void avrcp_batt_status_changed(struct avrcp *session,
+						struct avrcp_header *pdu)
+{
+}
+
 static void avrcp_setting_changed(struct avrcp *session,
 						struct avrcp_header *pdu)
 {
@@ -3725,6 +3730,9 @@ static gboolean avrcp_handle_event(struct avctp *conn, uint8_t code,
 	case AVRCP_EVENT_PLAYBACK_POS_CHANGED:
 		avrcp_playback_pos_changed(session, pdu);
 		break;
+	case AVRCP_EVENT_BATT_STATUS_CHANGED:
+		avrcp_batt_status_changed(session, pdu);
+		break;
 	case AVRCP_EVENT_SETTINGS_CHANGED:
 		avrcp_setting_changed(session, pdu);
 		break;
@@ -3812,6 +3820,7 @@ static gboolean avrcp_get_capabilities_resp(struct avctp *conn, uint8_t code,
 		case AVRCP_EVENT_STATUS_CHANGED:
 		case AVRCP_EVENT_TRACK_CHANGED:
 		case AVRCP_EVENT_PLAYBACK_POS_CHANGED:
+		case AVRCP_EVENT_BATT_STATUS_CHANGED:
 		case AVRCP_EVENT_SETTINGS_CHANGED:
 		case AVRCP_EVENT_ADDRESSED_PLAYER_CHANGED:
 		case AVRCP_EVENT_UIDS_CHANGED:
