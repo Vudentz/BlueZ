@@ -70,6 +70,7 @@ struct control {
 	struct btd_service *remote;
 	unsigned int avctp_id;
 	const char *player;
+	uint8_t battery;
 };
 
 static void state_changed(struct btd_device *dev, avctp_state_t old_state,
@@ -242,6 +243,23 @@ static gboolean control_get_player(const GDBusPropertyTable *property,
 	return TRUE;
 }
 
+static gboolean control_property_get_battery(const GDBusPropertyTable *property,
+					DBusMessageIter *iter, void *data)
+{
+	struct control *control = data;
+
+	dbus_message_iter_append_basic(iter, DBUS_TYPE_BYTE, &control->battery);
+
+	return TRUE;
+}
+
+static gboolean battery_exists(const GDBusPropertyTable *property, void *data)
+{
+	struct control *control = data;
+
+	return control->battery != 0;
+}
+
 static const GDBusMethodTable control_methods[] = {
 	{ GDBUS_DEPRECATED_METHOD("Play", NULL, NULL, control_play) },
 	{ GDBUS_DEPRECATED_METHOD("Pause", NULL, NULL, control_pause) },
@@ -260,6 +278,7 @@ static const GDBusMethodTable control_methods[] = {
 static const GDBusPropertyTable control_properties[] = {
 	{ "Connected", "b", control_property_get_connected },
 	{ "Player", "o", control_get_player, NULL, control_player_exists },
+	{ "Battery", "y", control_property_get_battery, NULL, battery_exists },
 	{ }
 };
 
@@ -386,4 +405,18 @@ int control_set_player(struct btd_service *service, const char *path)
 					AUDIO_CONTROL_INTERFACE, "Player");
 
 	return 0;
+}
+
+void control_set_battery_status(struct btd_service *service, uint8_t value)
+{
+	struct control *control = btd_service_get_user_data(service);
+
+	if (control->battery == value)
+		return;
+
+	control->battery = value;
+
+	g_dbus_emit_property_changed(btd_get_dbus_connection(),
+					btd_device_get_path(control->dev),
+					AUDIO_CONTROL_INTERFACE, "Battery");
 }
