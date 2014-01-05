@@ -110,3 +110,11 @@ plugins_sixaxis_la_LDFLAGS = $(AM_LDFLAGS) -module -avoid-version \
 						-no-undefined @UDEV_LIBS@
 plugins_sixaxis_la_CFLAGS = $(AM_CFLAGS) -fvisibility=hidden @UDEV_CFLAGS@
 endif
+
+if SERVICE
+plugin_LTLIBRARIES += plugins/service.la
+plugins_service_la_SOURCES = plugins/service.c
+plugins_service_la_LDFLAGS = $(AM_LDFLAGS) -module -avoid-version \
+								-no-undefined
+plugins_service_la_CFLAGS = $(AM_CFLAGS) -fvisibility=hidden
+endif
