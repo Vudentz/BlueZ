@@ -16,4 +16,5 @@ fi
 		--enable-experimental \
 		--enable-android \
 		--enable-sixaxis \
+		--enable-service \
 		--disable-datafiles $*
