@@ -978,7 +978,7 @@ static bool send_new_connection(struct ext_profile *ext, struct ext_io *conn)
 
 	dbus_message_iter_init_append(msg, &iter);
 
-	path = device_get_path(conn->device);
+	path = btd_device_get_path(conn->device);
 	dbus_message_iter_append_basic(&iter, DBUS_TYPE_OBJECT_PATH, &path);
 
 	fd = g_io_channel_unix_get_fd(conn->io);
@@ -1702,7 +1702,7 @@ static int send_disconn_req(struct ext_profile *ext, struct ext_io *conn)
 		return -ENOMEM;
 	}
 
-	path = device_get_path(conn->device);
+	path = btd_device_get_path(conn->device);
 	dbus_message_append_args(msg, DBUS_TYPE_OBJECT_PATH, &path,
 							DBUS_TYPE_INVALID);
 

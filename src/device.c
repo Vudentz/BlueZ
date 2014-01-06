@@ -5111,7 +5111,7 @@ const bdaddr_t *device_get_address(struct btd_device *device)
 	return &device->bdaddr;
 }
 
-const char *device_get_path(const struct btd_device *device)
+const char *btd_device_get_path(const struct btd_device *device)
 {
 	if (!device)
 		return NULL;

@@ -139,7 +139,7 @@ static void link_loss_emit_alert_signal(struct connected_device *condev)
 	if (!condev->device)
 		return;
 
-	path = device_get_path(condev->device);
+	path = btd_device_get_path(condev->device);
 	alert_level_str = get_alert_level_string(condev->alert_level);
 
 	DBG("alert %s remote %s", alert_level_str, path);

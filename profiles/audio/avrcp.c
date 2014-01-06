@@ -3330,7 +3330,7 @@ static struct avrcp_player *create_ct_player(struct avrcp *session,
 	player->id = id;
 	player->sessions = g_slist_prepend(player->sessions, session);
 
-	path = device_get_path(session->dev);
+	path = btd_device_get_path(session->dev);
 
 	mp = media_player_controller_create(path, id);
 	if (mp == NULL)
@@ -4384,7 +4384,7 @@ int avrcp_set_volume(struct btd_device *dev, uint8_t volume, bool notify)
 static int avrcp_connect(struct btd_service *service)
 {
 	struct btd_device *dev = btd_service_get_device(service);
-	const char *path = device_get_path(dev);
+	const char *path = btd_device_get_path(dev);
 
 	DBG("path %s", path);
 
@@ -4394,7 +4394,7 @@ static int avrcp_connect(struct btd_service *service)
 static int avrcp_disconnect(struct btd_service *service)
 {
 	struct btd_device *dev = btd_service_get_device(service);
-	const char *path = device_get_path(dev);
+	const char *path = btd_device_get_path(dev);
 
 	DBG("path %s", path);
 
@@ -4405,7 +4405,7 @@ static int avrcp_target_probe(struct btd_service *service)
 {
 	struct btd_device *dev = btd_service_get_device(service);
 
-	DBG("path %s", device_get_path(dev));
+	DBG("path %s", btd_device_get_path(dev));
 
 	return control_init_target(service);
 }
@@ -4488,7 +4488,7 @@ static int avrcp_controller_probe(struct btd_service *service)
 {
 	struct btd_device *dev = btd_service_get_device(service);
 
-	DBG("path %s", device_get_path(dev));
+	DBG("path %s", btd_device_get_path(dev));
 
 	return control_init_remote(service);
 }

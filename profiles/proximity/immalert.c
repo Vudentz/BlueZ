@@ -137,7 +137,7 @@ static void imm_alert_emit_alert_signal(struct connected_device *condev,
 	if (!condev)
 		return;
 
-	path = device_get_path(condev->device);
+	path = btd_device_get_path(condev->device);
 	alert_level_str = get_alert_level_string(alert_level);
 
 	DBG("alert %s remote %s", alert_level_str, path);

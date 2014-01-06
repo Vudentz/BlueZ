@@ -91,7 +91,7 @@ static void sink_set_state(struct sink *sink, sink_state_t new_state)
 
 	sink->state = new_state;
 
-	DBG("State changed %s: %s -> %s", device_get_path(dev),
+	DBG("State changed %s: %s -> %s", btd_device_get_path(dev),
 				str_state[old_state], str_state[new_state]);
 
 	for (l = sink_callbacks; l != NULL; l = l->next) {
@@ -334,7 +334,7 @@ void sink_unregister(struct btd_service *service)
 {
 	struct btd_device *dev = btd_service_get_device(service);
 
-	DBG("%s", device_get_path(dev));
+	DBG("%s", btd_device_get_path(dev));
 
 	sink_free(service);
 }
@@ -344,7 +344,7 @@ int sink_init(struct btd_service *service)
 	struct btd_device *dev = btd_service_get_device(service);
 	struct sink *sink;
 
-	DBG("%s", device_get_path(dev));
+	DBG("%s", btd_device_get_path(dev));
 
 	sink = g_new0(struct sink, 1);
 

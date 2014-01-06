@@ -1379,7 +1379,7 @@ static gboolean service_get_device(const GDBusPropertyTable *property,
 					DBusMessageIter *iter, void *data)
 {
 	struct service *service = data;
-	const char *str = device_get_path(service->client->device);
+	const char *str = btd_device_get_path(service->client->device);
 
 	dbus_message_iter_append_basic(iter, DBUS_TYPE_OBJECT_PATH, &str);
 
@@ -1446,7 +1446,7 @@ static struct service *service_create(struct gatt_db_attribute *attr,
 						struct btd_gatt_client *client)
 {
 	struct service *service;
-	const char *device_path = device_get_path(client->device);
+	const char *device_path = btd_device_get_path(client->device);
 	bt_uuid_t uuid;
 
 	service = new0(struct service, 1);
