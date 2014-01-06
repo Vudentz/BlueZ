@@ -1633,7 +1633,7 @@ static struct pending_op *pending_read_new(struct btd_device *device,
 static void append_options(DBusMessageIter *iter, void *user_data)
 {
 	struct pending_op *op = user_data;
-	const char *path = device_get_path(op->device);
+	const char *path = btd_device_get_path(op->device);
 
 	dict_append_entry(iter, "device", DBUS_TYPE_OBJECT_PATH, &path);
 	if (op->offset)

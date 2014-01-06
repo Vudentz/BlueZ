@@ -78,7 +78,7 @@ static void state_changed(struct btd_device *dev, avctp_state_t old_state,
 {
 	struct control *control = user_data;
 	DBusConnection *conn = btd_get_dbus_connection();
-	const char *path = device_get_path(dev);
+	const char *path = btd_device_get_path(dev);
 
 	switch (new_state) {
 	case AVCTP_STATE_DISCONNECTED:
@@ -268,7 +268,7 @@ static void path_unregister(void *data)
 	struct control *control = data;
 
 	DBG("Unregistered interface %s on path %s",  AUDIO_CONTROL_INTERFACE,
-						device_get_path(control->dev));
+						btd_device_get_path(control->dev));
 
 	if (control->session)
 		avctp_disconnect(control->session);
@@ -290,7 +290,7 @@ void control_unregister(struct btd_service *service)
 	struct btd_device *dev = btd_service_get_device(service);
 
 	g_dbus_unregister_interface(btd_get_dbus_connection(),
-						device_get_path(dev),
+						btd_device_get_path(dev),
 						AUDIO_CONTROL_INTERFACE);
 }
 
@@ -320,7 +320,7 @@ static struct control *control_init(struct btd_service *service)
 	control = g_new0(struct control, 1);
 
 	if (!g_dbus_register_interface(btd_get_dbus_connection(),
-					device_get_path(dev),
+					btd_device_get_path(dev),
 					AUDIO_CONTROL_INTERFACE,
 					control_methods, NULL,
 					control_properties, control,
@@ -330,7 +330,7 @@ static struct control *control_init(struct btd_service *service)
 	}
 
 	DBG("Registered interface %s on path %s", AUDIO_CONTROL_INTERFACE,
-							device_get_path(dev));
+						btd_device_get_path(dev));
 
 	control->dev = dev;
 	control->avctp_id = avctp_add_state_cb(dev, state_changed, control);
@@ -382,7 +382,7 @@ int control_set_player(struct btd_service *service, const char *path)
 	control->player = path;
 
 	g_dbus_emit_property_changed(btd_get_dbus_connection(),
-					device_get_path(control->dev),
+					btd_device_get_path(control->dev),
 					AUDIO_CONTROL_INTERFACE, "Player");
 
 	return 0;

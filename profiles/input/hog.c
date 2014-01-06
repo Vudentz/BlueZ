@@ -149,7 +149,7 @@ static void resume_callback(void)
 static int hog_probe(struct btd_service *service)
 {
 	struct btd_device *device = btd_service_get_device(service);
-	const char *path = device_get_path(device);
+	const char *path = btd_device_get_path(device);
 	struct hog_device *dev;
 
 	DBG("path %s", path);
@@ -166,7 +166,7 @@ static void hog_remove(struct btd_service *service)
 {
 	struct hog_device *dev = btd_service_get_user_data(service);
 	struct btd_device *device = btd_service_get_device(service);
-	const char *path = device_get_path(device);
+	const char *path = btd_device_get_path(device);
 
 	DBG("path %s", path);
 

@@ -121,7 +121,7 @@ static void bnep_disconn_cb(gpointer data)
 {
 	struct network_conn *nc = data;
 	DBusConnection *conn = btd_get_dbus_connection();
-	const char *path = device_get_path(nc->peer->device);
+	const char *path = btd_device_get_path(nc->peer->device);
 
 	g_dbus_emit_property_changed(conn, path,
 					NETWORK_PEER_INTERFACE, "Connected");
@@ -197,7 +197,7 @@ static void disconnect_cb(struct btd_device *device, gboolean removal,
 {
 	struct network_conn *nc = user_data;
 
-	info("Network: disconnect %s", device_get_path(nc->peer->device));
+	info("Network: disconnect %s", btd_device_get_path(nc->peer->device));
 
 	connection_destroy(NULL, user_data);
 }
@@ -224,7 +224,7 @@ static void bnep_conn_cb(char *iface, int err, void *data)
 		local_connect_cb(nc, 0);
 
 	conn = btd_get_dbus_connection();
-	path = device_get_path(nc->peer->device);
+	path = btd_device_get_path(nc->peer->device);
 
 	g_dbus_emit_property_changed(conn, path,
 					NETWORK_PEER_INTERFACE, "Connected");
@@ -484,7 +484,7 @@ static void path_unregister(void *data)
 	struct network_peer *peer = data;
 
 	DBG("Unregistered interface %s on path %s",
-		NETWORK_PEER_INTERFACE, device_get_path(peer->device));
+		NETWORK_PEER_INTERFACE, btd_device_get_path(peer->device));
 
 	peers = g_slist_remove(peers, peer);
 	peer_free(peer);
@@ -516,7 +516,7 @@ void connection_unregister(struct btd_service *svc)
 	struct network_peer *peer = conn->peer;
 	uint16_t id = get_pan_srv_id(btd_service_get_profile(svc)->remote_uuid);
 
-	DBG("%s id %u", device_get_path(device), id);
+	DBG("%s id %u", btd_device_get_path(device), id);
 
 	peer->connections = g_slist_remove(peer->connections, conn);
 	connection_free(conn);
@@ -525,7 +525,7 @@ void connection_unregister(struct btd_service *svc)
 		return;
 
 	g_dbus_unregister_interface(btd_get_dbus_connection(),
-						device_get_path(device),
+						btd_device_get_path(device),
 						NETWORK_PEER_INTERFACE);
 }
 
@@ -537,7 +537,7 @@ static struct network_peer *create_peer(struct btd_device *device)
 	peer = g_new0(struct network_peer, 1);
 	peer->device = btd_device_ref(device);
 
-	path = device_get_path(device);
+	path = btd_device_get_path(device);
 
 	if (g_dbus_register_interface(btd_get_dbus_connection(), path,
 					NETWORK_PEER_INTERFACE,
@@ -563,7 +563,7 @@ int connection_register(struct btd_service *svc)
 	struct network_conn *nc;
 	uint16_t id = get_pan_srv_id(btd_service_get_profile(svc)->remote_uuid);
 
-	DBG("%s id %u", device_get_path(device), id);
+	DBG("%s id %u", btd_device_get_path(device), id);
 
 	peer = find_peer(peers, device);
 	if (!peer) {
