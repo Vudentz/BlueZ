@@ -2137,7 +2137,7 @@ static int device_path_cmp(gconstpointer a, gconstpointer b)
 {
 	const struct btd_device *device = a;
 	const char *path = b;
-	const char *dev_path = device_get_path(device);
+	const char *dev_path = btd_device_get_path(device);
 
 	return strcasecmp(dev_path, path);
 }
@@ -2846,18 +2846,18 @@ int adapter_connect_list_add(struct btd_adapter *adapter,
 
 	if (g_slist_find(adapter->connect_list, device)) {
 		DBG("ignoring already added device %s",
-						device_get_path(device));
+						btd_device_get_path(device));
 		return 0;
 	}
 
 	if (!(adapter->supported_settings & MGMT_SETTING_LE)) {
 		error("Can't add %s to non-LE capable adapter connect list",
-						device_get_path(device));
+						btd_device_get_path(device));
 		return -ENOTSUP;
 	}
 
 	adapter->connect_list = g_slist_append(adapter->connect_list, device);
-	DBG("%s added to %s's connect_list", device_get_path(device),
+	DBG("%s added to %s's connect_list", btd_device_get_path(device),
 							adapter->system_name);
 
 	if (!(adapter->current_settings & MGMT_SETTING_POWERED))
@@ -2881,12 +2881,12 @@ void adapter_connect_list_remove(struct btd_adapter *adapter,
 
 	if (!g_slist_find(adapter->connect_list, device)) {
 		DBG("device %s is not on the list, ignoring",
-						device_get_path(device));
+						btd_device_get_path(device));
 		return;
 	}
 
 	adapter->connect_list = g_slist_remove(adapter->connect_list, device);
-	DBG("%s removed from %s's connect_list", device_get_path(device),
+	DBG("%s removed from %s's connect_list", btd_device_get_path(device),
 							adapter->system_name);
 
 	if (!adapter->connect_list) {
@@ -4318,7 +4318,7 @@ static void adapter_remove_connection(struct btd_adapter *adapter,
 		device_cancel_authentication(device, TRUE);
 
 	if (device_is_temporary(device) && !device_is_retrying(device)) {
-		const char *path = device_get_path(device);
+		const char *path = btd_device_get_path(device);
 
 		DBG("Removing temporary device %s", path);
 		btd_adapter_remove_device(adapter, device);
@@ -4445,7 +4445,7 @@ static gboolean process_auth_queue(gpointer user_data)
 			goto next;
 		}
 
-		dev_path = device_get_path(device);
+		dev_path = btd_device_get_path(device);
 
 		if (agent_authorize_service(auth->agent, dev_path, auth->uuid,
 					agent_auth_cb, adapter, NULL) < 0) {

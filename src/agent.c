@@ -503,7 +503,7 @@ int agent_request_pincode(struct agent *agent, struct btd_device *device,
 				void *user_data, GDestroyNotify destroy)
 {
 	struct agent_request *req;
-	const char *dev_path = device_get_path(device);
+	const char *dev_path = btd_device_get_path(device);
 	int err;
 
 	if (agent->request)
@@ -597,7 +597,7 @@ int agent_request_passkey(struct agent *agent, struct btd_device *device,
 				GDestroyNotify destroy)
 {
 	struct agent_request *req;
-	const char *dev_path = device_get_path(device);
+	const char *dev_path = btd_device_get_path(device);
 	int err;
 
 	if (agent->request)
@@ -656,7 +656,7 @@ int agent_request_confirmation(struct agent *agent, struct btd_device *device,
 				void *user_data, GDestroyNotify destroy)
 {
 	struct agent_request *req;
-	const char *dev_path = device_get_path(device);
+	const char *dev_path = btd_device_get_path(device);
 	int err;
 
 	if (agent->request)
@@ -713,7 +713,7 @@ int agent_request_authorization(struct agent *agent, struct btd_device *device,
 						GDestroyNotify destroy)
 {
 	struct agent_request *req;
-	const char *dev_path = device_get_path(device);
+	const char *dev_path = btd_device_get_path(device);
 	int err;
 
 	if (agent->request)
@@ -742,7 +742,7 @@ int agent_display_passkey(struct agent *agent, struct btd_device *device,
 				uint32_t passkey, uint16_t entered)
 {
 	DBusMessage *message;
-	const char *dev_path = device_get_path(device);
+	const char *dev_path = btd_device_get_path(device);
 
 	message = dbus_message_new_method_call(agent->owner, agent->path,
 					AGENT_INTERFACE, "DisplayPasskey");
@@ -848,7 +848,7 @@ int agent_display_pincode(struct agent *agent, struct btd_device *device,
 				void *user_data, GDestroyNotify destroy)
 {
 	struct agent_request *req;
-	const char *dev_path = device_get_path(device);
+	const char *dev_path = btd_device_get_path(device);
 	int err;
 
 	if (agent->request)

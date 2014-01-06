@@ -1832,7 +1832,7 @@ static int a2dp_source_probe(struct btd_service *service)
 {
 	struct btd_device *dev = btd_service_get_device(service);
 
-	DBG("path %s", device_get_path(dev));
+	DBG("path %s", btd_device_get_path(dev));
 
 	source_init(service);
 
@@ -1848,7 +1848,7 @@ static int a2dp_sink_probe(struct btd_service *service)
 {
 	struct btd_device *dev = btd_service_get_device(service);
 
-	DBG("path %s", device_get_path(dev));
+	DBG("path %s", btd_device_get_path(dev));
 
 	return sink_init(service);
 }
@@ -1863,7 +1863,7 @@ static int a2dp_source_connect(struct btd_service *service)
 	struct btd_device *dev = btd_service_get_device(service);
 	struct btd_adapter *adapter = device_get_adapter(dev);
 	struct a2dp_server *server;
-	const char *path = device_get_path(dev);
+	const char *path = btd_device_get_path(dev);
 
 	DBG("path %s", path);
 
@@ -1883,7 +1883,7 @@ static int a2dp_source_connect(struct btd_service *service)
 static int a2dp_source_disconnect(struct btd_service *service)
 {
 	struct btd_device *dev = btd_service_get_device(service);
-	const char *path = device_get_path(dev);
+	const char *path = btd_device_get_path(dev);
 
 	DBG("path %s", path);
 
@@ -1895,7 +1895,7 @@ static int a2dp_sink_connect(struct btd_service *service)
 	struct btd_device *dev = btd_service_get_device(service);
 	struct btd_adapter *adapter = device_get_adapter(dev);
 	struct a2dp_server *server;
-	const char *path = device_get_path(dev);
+	const char *path = btd_device_get_path(dev);
 
 	DBG("path %s", path);
 
@@ -1915,7 +1915,7 @@ static int a2dp_sink_connect(struct btd_service *service)
 static int a2dp_sink_disconnect(struct btd_service *service)
 {
 	struct btd_device *dev = btd_service_get_device(service);
-	const char *path = device_get_path(dev);
+	const char *path = btd_device_get_path(dev);
 
 	DBG("path %s", path);
 
