@@ -53,6 +53,7 @@ struct service_data {
 	struct btd_service *service;
 	char *path;
 	DBusMessage *connect;
+	DBusMessage *disconnect;
 };
 
 static struct service_data *find_data(struct btd_service *service)
@@ -76,6 +77,9 @@ static void data_free(void *user_data)
 	if (data->connect)
 		dbus_message_unref(data->connect);
 
+	if (data->disconnect)
+		dbus_message_unref(data->disconnect);
+
 	g_free(data->path);
 	g_free(data);
 }
@@ -90,7 +94,22 @@ static void data_remove(struct service_data *data)
 static DBusMessage *service_disconnect(DBusConnection *conn, DBusMessage *msg,
 								void *user_data)
 {
-	return btd_error_not_available(msg);
+	struct service_data *data = user_data;
+	int err;
+
+	if (data->disconnect)
+		return btd_error_in_progress(msg);
+
+	data->disconnect = dbus_message_ref(msg);
+
+	err = btd_service_disconnect(data->service);
+	if (err == 0)
+		return NULL;
+
+	dbus_message_unref(data->disconnect);
+	data->disconnect = NULL;
+
+	return btd_error_failed(msg, strerror(-err));
 }
 
 static DBusMessage *service_connect(DBusConnection *conn, DBusMessage *msg,
@@ -250,6 +269,13 @@ static void service_disconnected(struct service_data *data)
 {
 	DBusMessage *reply;
 	int err;
+
+	if (data->disconnect) {
+		reply = dbus_message_new_method_return(data->disconnect);
+		g_dbus_send_message(btd_get_dbus_connection(), reply);
+		dbus_message_unref(data->disconnect);
+		data->connect = NULL;
+	}
 
 	if (!data->connect)
 		return;
