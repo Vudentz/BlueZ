@@ -180,7 +180,7 @@ static void unregister_reporter_device(gpointer data, gpointer user_data)
 {
 	struct btd_device *device = data;
 	struct reporter_adapter *radapter = user_data;
-	const char *path = device_get_path(device);
+	const char *path = btd_device_get_path(device);
 
 	DBG("unregister on device %s", path);
 
@@ -194,7 +194,7 @@ static void unregister_reporter_device(gpointer data, gpointer user_data)
 static void register_reporter_device(struct btd_device *device,
 					struct reporter_adapter *radapter)
 {
-	const char *path = device_get_path(device);
+	const char *path = btd_device_get_path(device);
 
 	DBG("register on device %s", path);
 

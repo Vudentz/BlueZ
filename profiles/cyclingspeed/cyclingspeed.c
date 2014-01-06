@@ -420,7 +420,7 @@ static void read_location_cb(guint8 status, const guint8 *pdu,
 	csc->location = value;
 
 	g_dbus_emit_property_changed(btd_get_dbus_connection(),
-					device_get_path(csc->dev),
+					btd_device_get_path(csc->dev),
 					CYCLINGSPEED_INTERFACE, "Location");
 }
 
@@ -499,7 +499,7 @@ static void update_watcher(gpointer data, gpointer user_data)
 	struct watcher *w = data;
 	struct measurement *m = user_data;
 	struct csc *csc = m->csc;
-	const char *path = device_get_path(csc->dev);
+	const char *path = btd_device_get_path(csc->dev);
 	DBusMessageIter iter;
 	DBusMessageIter dict;
 	DBusMessage *msg;
@@ -728,7 +728,7 @@ static void controlpoint_ind_handler(const uint8_t *pdu, uint16_t len,
 		controlpoint_property_reply(req, rsp_code);
 
 		g_dbus_emit_property_changed(btd_get_dbus_connection(),
-					device_get_path(csc->dev),
+					btd_device_get_path(csc->dev),
 					CYCLINGSPEED_INTERFACE, "Location");
 		break;
 	}
@@ -1189,7 +1189,7 @@ static int csc_device_probe(struct btd_service *service)
 	csc->cadapter = cadapter;
 
 	if (!g_dbus_register_interface(btd_get_dbus_connection(),
-						device_get_path(device),
+						btd_device_get_path(device),
 						CYCLINGSPEED_INTERFACE,
 						cyclingspeed_device_methods,
 						NULL,
@@ -1236,7 +1236,7 @@ static void csc_device_remove(struct btd_service *service)
 	cadapter->devices = g_slist_remove(cadapter->devices, csc);
 
 	g_dbus_unregister_interface(btd_get_dbus_connection(),
-						device_get_path(device),
+						btd_device_get_path(device),
 						CYCLINGSPEED_INTERFACE);
 }
 
