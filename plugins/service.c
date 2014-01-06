@@ -95,6 +95,46 @@ static DBusMessage *service_connect(DBusConnection *conn, DBusMessage *msg,
 	return btd_error_not_available(msg);
 }
 
+static const char *data_get_state(struct service_data *data)
+{
+	btd_service_state_t state = btd_service_get_state(data->service);
+	int err;
+
+	switch (state) {
+	case BTD_SERVICE_STATE_UNAVAILABLE:
+		return "unavailable";
+	case BTD_SERVICE_STATE_DISCONNECTED:
+		err = btd_service_get_error(data->service);
+		return err < 0 ? "error" : "disconnected";
+	case BTD_SERVICE_STATE_CONNECTING:
+		return "connecting";
+	case BTD_SERVICE_STATE_CONNECTED:
+		return "connected";
+	case BTD_SERVICE_STATE_DISCONNECTING:
+		return "disconnecting";
+	}
+
+	return "unknown";
+}
+
+static gboolean get_state(const GDBusPropertyTable *property,
+					DBusMessageIter *iter, void *user_data)
+{
+	struct service_data *data = user_data;
+	const char *state;
+
+	state = data_get_state(data);
+
+	dbus_message_iter_append_basic(iter, DBUS_TYPE_STRING, &state);
+
+	return TRUE;
+}
+
+static const GDBusPropertyTable service_properties[] = {
+	{ "State", "s", get_state, NULL, NULL },
+	{ }
+};
+
 static const GDBusMethodTable service_methods[] = {
 	{ GDBUS_ASYNC_METHOD("Disconnect", NULL, NULL, service_disconnect) },
 	{ GDBUS_ASYNC_METHOD("Connect", NULL, NULL, service_connect) },
@@ -119,7 +159,7 @@ static struct service_data *service_get_data(struct btd_service *service)
 	if (g_dbus_register_interface(btd_get_dbus_connection(),
 					data->path, SERVICE_INTERFACE,
 					service_methods, NULL,
-					NULL, data,
+					service_properties, data,
 					data_free) == FALSE) {
 		error("Unable to register service interface for %s",
 								data->path);
@@ -142,10 +182,16 @@ static void service_cb(struct btd_service *service,
 	struct service_data *data;
 
 	data = service_get_data(service);
-	if (!data || new_state != BTD_SERVICE_STATE_UNAVAILABLE)
+	if (!data)
 		return;
 
-	data_remove(data);
+	if (new_state == BTD_SERVICE_STATE_UNAVAILABLE) {
+		data_remove(data);
+		return;
+	}
+
+	g_dbus_emit_property_changed(btd_get_dbus_connection(), data->path,
+						SERVICE_INTERFACE, "State");
 }
 
 static int service_init(void)
