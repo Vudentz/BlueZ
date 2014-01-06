@@ -429,7 +429,7 @@ static gboolean channel_property_get_device(const GDBusPropertyTable *property,
 					DBusMessageIter *iter, void *data)
 {
 	struct hdp_channel *chan = data;
-	const char *path = device_get_path(chan->dev->dev);
+	const char *path = btd_device_get_path(chan->dev->dev);
 
 	dbus_message_iter_append_basic(iter, DBUS_TYPE_OBJECT_PATH, &path);
 
@@ -517,7 +517,7 @@ static void hdp_mdl_reconn_cb(struct mcap_mdl *mdl, GError *err, gpointer data)
 							&fd, DBUS_TYPE_INVALID);
 	g_dbus_send_message(conn, reply);
 
-	g_dbus_emit_signal(conn, device_get_path(dc_data->hdp_chann->dev->dev),
+	g_dbus_emit_signal(conn, btd_device_get_path(dc_data->hdp_chann->dev->dev),
 			HEALTH_DEVICE, "ChannelConnected",
 			DBUS_TYPE_OBJECT_PATH, &dc_data->hdp_chann->path,
 			DBUS_TYPE_INVALID);
@@ -711,7 +711,7 @@ static void health_channel_destroy(void *data)
 
 	if (hdp_chan->mdep != HDP_MDEP_ECHO)
 		g_dbus_emit_signal(btd_get_dbus_connection(),
-					device_get_path(dev->dev),
+					btd_device_get_path(dev->dev),
 					HEALTH_DEVICE, "ChannelDeleted",
 					DBUS_TYPE_OBJECT_PATH, &hdp_chan->path,
 					DBUS_TYPE_INVALID);
@@ -770,7 +770,7 @@ static struct hdp_channel *create_channel(struct hdp_device *dev,
 		hdp_chann->edata = g_new0(struct hdp_echo_data, 1);
 
 	hdp_chann->path = g_strdup_printf("%s/chan%d",
-					device_get_path(hdp_chann->dev->dev),
+					btd_device_get_path(hdp_chann->dev->dev),
 					hdp_chann->mdlid);
 
 	dev->channels = g_slist_append(dev->channels,
@@ -826,7 +826,7 @@ static void close_device_con(struct hdp_device *dev, gboolean cache)
 	if (!dev->sdp_present) {
 		const char *path;
 
-		path = device_get_path(dev->dev);
+		path = btd_device_get_path(dev->dev);
 		g_dbus_unregister_interface(btd_get_dbus_connection(),
 							path, HEALTH_DEVICE);
 	}
@@ -972,7 +972,7 @@ static void hdp_mcap_mdl_connected_cb(struct mcap_mdl *mdl, void *data)
 		goto end;
 	}
 
-	g_dbus_emit_signal(btd_get_dbus_connection(), device_get_path(dev->dev),
+	g_dbus_emit_signal(btd_get_dbus_connection(), btd_device_get_path(dev->dev),
 				HEALTH_DEVICE, "ChannelConnected",
 				DBUS_TYPE_OBJECT_PATH, &chan->path,
 				DBUS_TYPE_INVALID);
@@ -983,7 +983,7 @@ static void hdp_mcap_mdl_connected_cb(struct mcap_mdl *mdl, void *data)
 	dev->fr = hdp_channel_ref(chan);
 
 	g_dbus_emit_property_changed(btd_get_dbus_connection(),
-				device_get_path(dev->dev), HEALTH_DEVICE,
+				btd_device_get_path(dev->dev), HEALTH_DEVICE,
 				"MainChannel");
 
 end:
@@ -1039,7 +1039,7 @@ static void hdp_mcap_mdl_aborted_cb(struct mcap_mdl *mdl, void *data)
 
 	if (dev->ndc->mdep != HDP_MDEP_ECHO)
 		g_dbus_emit_signal(btd_get_dbus_connection(),
-					device_get_path(dev->dev),
+					btd_device_get_path(dev->dev),
 					HEALTH_DEVICE, "ChannelConnected",
 					DBUS_TYPE_OBJECT_PATH, &dev->ndc->path,
 					DBUS_TYPE_INVALID);
@@ -1232,7 +1232,7 @@ static void mcl_connected(struct mcap_mcl *mcl, gpointer data)
 	hdp_device->mcl = mcap_mcl_ref(mcl);
 	hdp_device->mcl_conn = TRUE;
 
-	DBG("New mcl connected from  %s", device_get_path(hdp_device->dev));
+	DBG("New mcl connected from  %s", btd_device_get_path(hdp_device->dev));
 
 	hdp_set_mcl_cb(hdp_device, NULL);
 }
@@ -1249,7 +1249,7 @@ static void mcl_reconnected(struct mcap_mcl *mcl, gpointer data)
 	hdp_device = l->data;
 	hdp_device->mcl_conn = TRUE;
 
-	DBG("MCL reconnected %s", device_get_path(hdp_device->dev));
+	DBG("MCL reconnected %s", btd_device_get_path(hdp_device->dev));
 
 	hdp_set_mcl_cb(hdp_device, NULL);
 }
@@ -1266,7 +1266,7 @@ static void mcl_disconnected(struct mcap_mcl *mcl, gpointer data)
 	hdp_device = l->data;
 	hdp_device->mcl_conn = FALSE;
 
-	DBG("Mcl disconnected %s", device_get_path(hdp_device->dev));
+	DBG("Mcl disconnected %s", btd_device_get_path(hdp_device->dev));
 }
 
 static void mcl_uncached(struct mcap_mcl *mcl, gpointer data)
@@ -1289,7 +1289,7 @@ static void mcl_uncached(struct mcap_mcl *mcl, gpointer data)
 	/* the Bluetooth daemon won't notify when the device shall */
 	/* be removed. Then we have to remove the HealthDevice */
 	/* interface manually */
-	path = device_get_path(hdp_device->dev);
+	path = btd_device_get_path(hdp_device->dev);
 	g_dbus_unregister_interface(btd_get_dbus_connection(),
 							path, HEALTH_DEVICE);
 	DBG("Mcl uncached %s", path);
@@ -1313,7 +1313,7 @@ static void check_devices_mcl(void)
 	for (l = to_delete; l; l = l->next) {
 		const char *path;
 
-		path = device_get_path(dev->dev);
+		path = btd_device_get_path(dev->dev);
 		g_dbus_unregister_interface(btd_get_dbus_connection(),
 							path, HEALTH_DEVICE);
 	}
@@ -1653,7 +1653,7 @@ static void abort_mdl_connection_cb(GError *err, gpointer data)
 	/* notify the channel created at MCAP level */
 	if (hdp_chann->mdep != HDP_MDEP_ECHO)
 		g_dbus_emit_signal(btd_get_dbus_connection(),
-					device_get_path(hdp_chann->dev->dev),
+					btd_device_get_path(hdp_chann->dev->dev),
 					HEALTH_DEVICE, "ChannelConnected",
 					DBUS_TYPE_OBJECT_PATH, &hdp_chann->path,
 					DBUS_TYPE_INVALID);
@@ -1692,7 +1692,7 @@ static void hdp_mdl_conn_cb(struct mcap_mdl *mdl, GError *err, gpointer data)
 					DBUS_TYPE_INVALID);
 	g_dbus_send_message(conn, reply);
 
-	g_dbus_emit_signal(conn, device_get_path(hdp_chann->dev->dev),
+	g_dbus_emit_signal(conn, btd_device_get_path(hdp_chann->dev->dev),
 				HEALTH_DEVICE, "ChannelConnected",
 				DBUS_TYPE_OBJECT_PATH, &hdp_chann->path,
 				DBUS_TYPE_INVALID);
@@ -1708,7 +1708,7 @@ static void hdp_mdl_conn_cb(struct mcap_mdl *mdl, GError *err, gpointer data)
 	dev->fr = hdp_channel_ref(hdp_chann);
 
 	g_dbus_emit_property_changed(btd_get_dbus_connection(),
-				device_get_path(dev->dev), HEALTH_DEVICE,
+				btd_device_get_path(dev->dev), HEALTH_DEVICE,
 				"MainChannel");
 }
 
@@ -2093,7 +2093,7 @@ static void health_device_destroy(void *data)
 	struct hdp_device *device = data;
 
 	DBG("Unregistered interface %s on path %s", HEALTH_DEVICE,
-						device_get_path(device->dev));
+						btd_device_get_path(device->dev));
 
 	remove_channels(device);
 	if (device->ndc != NULL) {
@@ -2136,7 +2136,7 @@ static const GDBusPropertyTable health_device_properties[] = {
 static struct hdp_device *create_health_device(struct btd_device *device)
 {
 	struct btd_adapter *adapter = device_get_adapter(device);
-	const char *path = device_get_path(device);
+	const char *path = btd_device_get_path(device);
 	struct hdp_device *dev;
 	GSList *l;
 
@@ -2204,7 +2204,7 @@ void hdp_device_unregister(struct btd_device *device)
 		return;
 
 	hdp_dev = l->data;
-	path = device_get_path(hdp_dev->dev);
+	path = btd_device_get_path(hdp_dev->dev);
 	g_dbus_unregister_interface(btd_get_dbus_connection(),
 							path, HEALTH_DEVICE);
 }

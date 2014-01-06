@@ -550,7 +550,7 @@ static gboolean get_device(const GDBusPropertyTable *property,
 					DBusMessageIter *iter, void *data)
 {
 	struct media_transport *transport = data;
-	const char *path = device_get_path(transport->device);
+	const char *path = btd_device_get_path(transport->device);
 
 	dbus_message_iter_append_basic(iter, DBUS_TYPE_OBJECT_PATH, &path);
 
@@ -849,8 +849,9 @@ struct media_transport *media_transport_create(struct btd_device *device,
 	transport->configuration = g_new(uint8_t, size);
 	memcpy(transport->configuration, configuration, size);
 	transport->size = size;
-	transport->path = g_strdup_printf("%s/fd%d", device_get_path(device),
-									fd++);
+	transport->path = g_strdup_printf("%s/fd%d",
+						btd_device_get_path(device),
+						fd++);
 	transport->fd = -1;
 
 	uuid = media_endpoint_get_uuid(endpoint);

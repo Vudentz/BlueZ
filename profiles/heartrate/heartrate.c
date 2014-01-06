@@ -271,7 +271,7 @@ static void update_watcher(gpointer data, gpointer user_data)
 	struct watcher *w = data;
 	struct measurement *m = user_data;
 	struct heartrate *hr = m->hr;
-	const char *path = device_get_path(hr->dev);
+	const char *path = btd_device_get_path(hr->dev);
 	DBusMessageIter iter;
 	DBusMessageIter dict;
 	DBusMessage *msg;
@@ -765,7 +765,7 @@ static int heartrate_device_register(struct btd_device *device,
 	hr->hradapter = hradapter;
 
 	if (!g_dbus_register_interface(btd_get_dbus_connection(),
-						device_get_path(device),
+						btd_device_get_path(device),
 						HEART_RATE_INTERFACE,
 						heartrate_device_methods,
 						NULL,
@@ -811,7 +811,8 @@ static void heartrate_device_unregister(struct btd_device *device)
 	hradapter->devices = g_slist_remove(hradapter->devices, hr);
 
 	g_dbus_unregister_interface(btd_get_dbus_connection(),
-				device_get_path(device), HEART_RATE_INTERFACE);
+					btd_device_get_path(device),
+					HEART_RATE_INTERFACE);
 }
 
 static int heartrate_adapter_probe(struct btd_profile *p,

@@ -175,7 +175,7 @@ static void linkloss_written(guint8 status, const guint8 *pdu, guint16 plen,
 {
 	struct monitor *monitor = user_data;
 	struct btd_device *device = monitor->device;
-	const char *path = device_get_path(device);
+	const char *path = btd_device_get_path(device);
 
 	if (status != 0) {
 		error("Link Loss Write Request failed: %s",
@@ -303,7 +303,7 @@ static void read_tx_power(struct monitor *monitor)
 static gboolean immediate_timeout(gpointer user_data)
 {
 	struct monitor *monitor = user_data;
-	const char *path = device_get_path(monitor->device);
+	const char *path = btd_device_get_path(monitor->device);
 
 	monitor->immediateto = 0;
 
@@ -329,7 +329,7 @@ static gboolean immediate_timeout(gpointer user_data)
 static void immediate_written(gpointer user_data)
 {
 	struct monitor *monitor = user_data;
-	const char *path = device_get_path(monitor->device);
+	const char *path = btd_device_get_path(monitor->device);
 
 	g_free(monitor->fallbacklevel);
 	monitor->fallbacklevel = NULL;
@@ -404,7 +404,7 @@ static void attio_connected_cb(GAttrib *attrib, gpointer user_data)
 static void attio_disconnected_cb(gpointer user_data)
 {
 	struct monitor *monitor = user_data;
-	const char *path = device_get_path(monitor->device);
+	const char *path = btd_device_get_path(monitor->device);
 
 	g_attrib_unref(monitor->attrib);
 	monitor->attrib = NULL;
@@ -620,7 +620,7 @@ static void monitor_destroy(gpointer user_data)
 
 static struct monitor *register_monitor(struct btd_device *device)
 {
-	const char *path = device_get_path(device);
+	const char *path = btd_device_get_path(device);
 	struct monitor *monitor;
 	char *level;
 
@@ -748,7 +748,7 @@ int monitor_register_immediate(struct btd_device *device,
 static void cleanup_monitor(struct monitor *monitor)
 {
 	struct btd_device *device = monitor->device;
-	const char *path = device_get_path(device);
+	const char *path = btd_device_get_path(device);
 
 	if (monitor->immediate != NULL || monitor->txpower != NULL)
 		return;

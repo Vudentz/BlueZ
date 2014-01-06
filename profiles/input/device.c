@@ -1305,7 +1305,7 @@ static struct input_device *input_device_new(struct btd_service *service)
 {
 	struct btd_device *device = btd_service_get_device(service);
 	struct btd_profile *p = btd_service_get_profile(service);
-	const char *path = device_get_path(device);
+	const char *path = btd_device_get_path(device);
 	const sdp_record_t *rec = btd_device_get_record(device, p->remote_uuid);
 	struct btd_adapter *adapter = device_get_adapter(device);
 	struct input_device *idev;
@@ -1348,7 +1348,7 @@ static const GDBusPropertyTable input_properties[] = {
 int input_device_register(struct btd_service *service)
 {
 	struct btd_device *device = btd_service_get_device(service);
-	const char *path = device_get_path(device);
+	const char *path = btd_device_get_path(device);
 	struct input_device *idev;
 
 	DBG("%s", path);
@@ -1401,7 +1401,7 @@ static struct input_device *find_device(const bdaddr_t *src,
 void input_device_unregister(struct btd_service *service)
 {
 	struct btd_device *device = btd_service_get_device(service);
-	const char *path = device_get_path(device);
+	const char *path = btd_device_get_path(device);
 	struct input_device *idev = btd_service_get_user_data(service);
 
 	DBG("%s", path);
