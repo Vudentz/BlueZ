@@ -130,8 +130,29 @@ static gboolean get_state(const GDBusPropertyTable *property,
 	return TRUE;
 }
 
+static gboolean remote_uuid_exists(const GDBusPropertyTable *property,
+								void *user_data)
+{
+	struct service_data *data = user_data;
+	struct btd_profile *p = btd_service_get_profile(data->service);
+
+	return p->remote_uuid != NULL;
+}
+
+static gboolean get_remote_uuid(const GDBusPropertyTable *property,
+					DBusMessageIter *iter, void *user_data)
+{
+	struct service_data *data = user_data;
+	struct btd_profile *p = btd_service_get_profile(data->service);
+
+	dbus_message_iter_append_basic(iter, DBUS_TYPE_STRING, &p->remote_uuid);
+
+	return TRUE;
+}
+
 static const GDBusPropertyTable service_properties[] = {
 	{ "State", "s", get_state, NULL, NULL },
+	{ "RemoteUUID", "s", get_remote_uuid, NULL, remote_uuid_exists },
 	{ }
 };
 
