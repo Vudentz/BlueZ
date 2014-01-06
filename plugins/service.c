@@ -52,6 +52,7 @@ static GSList *services = NULL;
 struct service_data {
 	struct btd_service *service;
 	char *path;
+	DBusMessage *connect;
 };
 
 static struct service_data *find_data(struct btd_service *service)
@@ -71,6 +72,9 @@ static struct service_data *find_data(struct btd_service *service)
 static void data_free(void *user_data)
 {
 	struct service_data *data = user_data;
+
+	if (data->connect)
+		dbus_message_unref(data->connect);
 
 	g_free(data->path);
 	g_free(data);
@@ -92,7 +96,19 @@ static DBusMessage *service_disconnect(DBusConnection *conn, DBusMessage *msg,
 static DBusMessage *service_connect(DBusConnection *conn, DBusMessage *msg,
 								void *user_data)
 {
-	return btd_error_not_available(msg);
+	struct service_data *data = user_data;
+	int err;
+
+	if (data->connect)
+		return btd_error_in_progress(msg);
+
+	err = btd_service_connect(data->service);
+	if (err < 0)
+		return btd_error_failed(msg, strerror(-err));
+
+	data->connect = dbus_message_ref(msg);
+
+	return NULL;
 }
 
 static const char *data_get_state(struct service_data *data)
@@ -217,6 +233,35 @@ static struct service_data *service_get_data(struct btd_service *service)
 	return data;
 }
 
+static void service_connected(struct service_data *data)
+{
+	DBusMessage *reply;
+
+	if (!data->connect)
+		return;
+
+	reply = dbus_message_new_method_return(data->connect);
+	g_dbus_send_message(btd_get_dbus_connection(), reply);
+	dbus_message_unref(data->connect);
+	data->connect = NULL;
+}
+
+static void service_disconnected(struct service_data *data)
+{
+	DBusMessage *reply;
+	int err;
+
+	if (!data->connect)
+		return;
+
+	err = btd_service_get_error(data->service);
+
+	reply = btd_error_failed(data->connect, strerror(-err));
+	g_dbus_send_message(btd_get_dbus_connection(), reply);
+	dbus_message_unref(data->connect);
+	data->connect = NULL;
+}
+
 static void service_cb(struct btd_service *service,
 						btd_service_state_t old_state,
 						btd_service_state_t new_state,
@@ -228,9 +273,22 @@ static void service_cb(struct btd_service *service,
 	if (!data)
 		return;
 
-	if (new_state == BTD_SERVICE_STATE_UNAVAILABLE) {
+	switch (new_state) {
+	case BTD_SERVICE_STATE_UNAVAILABLE:
 		data_remove(data);
 		return;
+	case BTD_SERVICE_STATE_CONNECTED:
+		service_connected(data);
+		break;
+	case BTD_SERVICE_STATE_DISCONNECTED:
+		service_disconnected(data);
+		break;
+	case BTD_SERVICE_STATE_CONNECTING:
+		break;
+	case BTD_SERVICE_STATE_DISCONNECTING:
+		break;
+	default:
+		break;
 	}
 
 	g_dbus_emit_property_changed(btd_get_dbus_connection(), data->path,
