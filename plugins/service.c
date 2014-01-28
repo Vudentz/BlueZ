@@ -152,6 +152,18 @@ static const char *data_get_state(struct service_data *data)
 	return "unknown";
 }
 
+static gboolean get_device(const GDBusPropertyTable *property,
+					DBusMessageIter *iter, void *user_data)
+{
+	struct service_data *data = user_data;
+	struct btd_device *dev = btd_service_get_device(data->service);
+	const char *path = btd_device_get_path(dev);
+
+	dbus_message_iter_append_basic(iter, DBUS_TYPE_OBJECT_PATH, &path);
+
+	return TRUE;
+}
+
 static gboolean get_state(const GDBusPropertyTable *property,
 					DBusMessageIter *iter, void *user_data)
 {
@@ -207,6 +219,7 @@ static gboolean get_local_uuid(const GDBusPropertyTable *property,
 }
 
 static const GDBusPropertyTable service_properties[] = {
+	{ "Device", "o", get_device, NULL, NULL },
 	{ "State", "s", get_state, NULL, NULL },
 	{ "RemoteUUID", "s", get_remote_uuid, NULL, remote_uuid_exists },
 	{ "LocalUUID", "s", get_local_uuid, NULL, local_uuid_exists },
