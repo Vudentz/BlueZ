@@ -1687,7 +1687,6 @@ static int service_prio_cmp(gconstpointer a, gconstpointer b)
 static GSList *create_pending_list(struct btd_device *dev, const char *uuid)
 {
 	struct btd_service *service;
-	struct btd_profile *p;
 	GSList *l;
 
 	if (uuid) {
@@ -1700,9 +1699,8 @@ static GSList *create_pending_list(struct btd_device *dev, const char *uuid)
 
 	for (l = dev->services; l != NULL; l = g_slist_next(l)) {
 		service = l->data;
-		p = btd_service_get_profile(service);
 
-		if (!p->auto_connect)
+		if (!btd_service_get_auto_connect(service))
 			continue;
 
 		if (g_slist_find(dev->pending, service))
