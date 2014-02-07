@@ -4478,6 +4478,8 @@ static struct btd_profile avrcp_target_profile = {
 	.version	= 0x0105,
 
 	.remote_uuid	= AVRCP_TARGET_UUID,
+	.local_uuid	= AVRCP_REMOTE_UUID,
+
 	.device_probe	= avrcp_target_probe,
 	.device_remove	= avrcp_target_remove,
 
@@ -4562,6 +4564,8 @@ static struct btd_profile avrcp_controller_profile = {
 	.version	= 0x0104,
 
 	.remote_uuid	= AVRCP_REMOTE_UUID,
+	.local_uuid	= AVRCP_TARGET_UUID,
+
 	.device_probe	= avrcp_controller_probe,
 	.device_remove	= avrcp_controller_remove,
 
