@@ -218,11 +218,32 @@ static gboolean get_local_uuid(const GDBusPropertyTable *property,
 	return TRUE;
 }
 
+static gboolean version_exists(const GDBusPropertyTable *property,
+								void *user_data)
+{
+	struct service_data *data = user_data;
+	uint16_t version = btd_service_get_version(data->service);
+
+	return version != 0x0000;
+}
+
+static gboolean get_version(const GDBusPropertyTable *property,
+					DBusMessageIter *iter, void *user_data)
+{
+	struct service_data *data = user_data;
+	uint16_t version = btd_service_get_version(data->service);
+
+	dbus_message_iter_append_basic(iter, DBUS_TYPE_UINT16, &version);
+
+	return TRUE;
+}
+
 static const GDBusPropertyTable service_properties[] = {
 	{ "Device", "o", get_device, NULL, NULL },
 	{ "State", "s", get_state, NULL, NULL },
 	{ "RemoteUUID", "s", get_remote_uuid, NULL, remote_uuid_exists },
 	{ "LocalUUID", "s", get_local_uuid, NULL, local_uuid_exists },
+	{ "Version", "q", get_version, NULL, version_exists },
 	{ }
 };
 
