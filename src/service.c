@@ -347,6 +347,9 @@ uint16_t btd_service_get_version(const struct btd_service *service)
 	sdp_profile_desc_t *desc;
 	uint16_t version;
 
+	if (!service->profile->version)
+		return 0;
+
 	rec = btd_device_get_record(service->device,
 					service->profile->remote_uuid);
 	if (rec == NULL)
@@ -359,7 +362,7 @@ uint16_t btd_service_get_version(const struct btd_service *service)
 	version = desc->version;
 	sdp_list_free(list, free);
 
-	return version;
+	return MIN(version, service->profile->version);
 }
 
 unsigned int btd_service_add_state_cb(btd_service_state_cb cb, void *user_data)
