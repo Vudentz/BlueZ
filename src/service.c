@@ -38,6 +38,7 @@
 
 #include "lib/bluetooth.h"
 #include "lib/sdp.h"
+#include "lib/sdp_lib.h"
 
 #include "log.h"
 #include "backtrace.h"
@@ -337,6 +338,28 @@ btd_service_state_t btd_service_get_state(const struct btd_service *service)
 int btd_service_get_error(const struct btd_service *service)
 {
 	return service->err;
+}
+
+uint16_t btd_service_get_version(const struct btd_service *service)
+{
+	const sdp_record_t *rec;
+	sdp_list_t *list;
+	sdp_profile_desc_t *desc;
+	uint16_t version;
+
+	rec = btd_device_get_record(service->device,
+					service->profile->remote_uuid);
+	if (rec == NULL)
+		return 0;
+
+	if (sdp_get_profile_descs(rec, &list) < 0)
+		return 0;
+
+	desc = list->data;
+	version = desc->version;
+	sdp_list_free(list, free);
+
+	return version;
 }
 
 unsigned int btd_service_add_state_cb(btd_service_state_cb cb, void *user_data)
