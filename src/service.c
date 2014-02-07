@@ -55,6 +55,7 @@ struct btd_service {
 	void			*user_data;
 	btd_service_state_t	state;
 	int			err;
+	bool			auto_connect;
 };
 
 struct service_state_callback {
@@ -146,6 +147,7 @@ struct btd_service *service_create(struct btd_device *device,
 	service->ref = 1;
 	service->device = device; /* Weak ref */
 	service->profile = profile;
+	service->auto_connect = profile->auto_connect;
 	service->state = BTD_SERVICE_STATE_UNAVAILABLE;
 
 	return service;
@@ -343,6 +345,11 @@ uint16_t btd_service_get_version(const struct btd_service *service)
 	sdp_list_free(list, free);
 
 	return MIN(version, service->profile->version);
+}
+
+void btd_service_set_auto_connect(struct btd_service *service, bool value)
+{
+	service->auto_connect = value;
 }
 
 unsigned int btd_service_add_state_cb(btd_service_state_cb cb, void *user_data)
