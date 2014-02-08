@@ -34,6 +34,7 @@ struct btd_profile {
 
 	const char *local_uuid;
 	const char *remote_uuid;
+	const char *auth_uuid;
 
 	bool auto_connect;
 	bool external;

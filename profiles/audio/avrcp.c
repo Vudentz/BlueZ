@@ -4476,6 +4476,7 @@ static struct btd_profile avrcp_target_profile = {
 
 	.remote_uuid	= AVRCP_TARGET_UUID,
 	.local_uuid	= AVRCP_REMOTE_UUID,
+	.auth_uuid	= AVRCP_REMOTE_UUID,
 
 	.device_probe	= avrcp_target_probe,
 	.device_remove	= avrcp_target_remove,
@@ -4562,6 +4563,7 @@ static struct btd_profile avrcp_controller_profile = {
 
 	.remote_uuid	= AVRCP_REMOTE_UUID,
 	.local_uuid	= AVRCP_TARGET_UUID,
+	.auth_uuid	= AVRCP_REMOTE_UUID,
 
 	.device_probe	= avrcp_controller_probe,
 	.device_remove	= avrcp_controller_remove,
