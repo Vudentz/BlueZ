@@ -271,6 +271,39 @@ static void set_auto_connect(const GDBusPropertyTable *property,
 	g_dbus_pending_property_success(id);
 }
 
+static gboolean get_blocked(const GDBusPropertyTable *property,
+					DBusMessageIter *iter, void *user_data)
+{
+	struct service_data *data = user_data;
+	dbus_bool_t value = btd_service_is_blocked(data->service);
+
+	dbus_message_iter_append_basic(iter, DBUS_TYPE_BOOLEAN, &value);
+
+	return TRUE;
+}
+
+static void set_blocked(const GDBusPropertyTable *property,
+						DBusMessageIter *value,
+						GDBusPendingPropertySet id,
+						void *user_data)
+{
+	struct service_data *data = user_data;
+	dbus_bool_t b;
+
+	if (dbus_message_iter_get_arg_type(value) != DBUS_TYPE_BOOLEAN) {
+		g_dbus_pending_property_error(id,
+					ERROR_INTERFACE ".InvalidArguments",
+					"Invalid arguments in method call");
+		return;
+	}
+
+	dbus_message_iter_get_basic(value, &b);
+
+	btd_service_set_blocked(data->service, b);
+
+	g_dbus_pending_property_success(id);
+}
+
 static const GDBusPropertyTable service_properties[] = {
 	{ "Device", "o", get_device, NULL, NULL },
 	{ "State", "s", get_state, NULL, NULL },
@@ -278,6 +311,7 @@ static const GDBusPropertyTable service_properties[] = {
 	{ "LocalUUID", "s", get_local_uuid, NULL, local_uuid_exists },
 	{ "Version", "q", get_version, NULL, version_exists },
 	{ "AutoConnect", "b", get_auto_connect, set_auto_connect, NULL },
+	{ "Blocked", "b", get_blocked, set_blocked, NULL },
 	{ }
 };
 
