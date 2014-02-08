@@ -363,6 +363,11 @@ void btd_service_set_blocked(struct btd_service *service, bool value)
 	service->blocked = value;
 }
 
+bool btd_service_is_blocked(const struct btd_service *service)
+{
+	return service->blocked;
+}
+
 unsigned int btd_service_add_state_cb(btd_service_state_cb cb, void *user_data)
 {
 	struct service_state_callback *state_cb;
