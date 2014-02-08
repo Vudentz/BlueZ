@@ -2486,6 +2486,7 @@ static struct btd_profile a2dp_source_profile = {
 
 	.remote_uuid	= A2DP_SOURCE_UUID,
 	.local_uuid	= A2DP_SINK_UUID,
+	.auth_uuid	= ADVANCED_AUDIO_UUID,
 
 	.device_probe	= a2dp_source_probe,
 	.device_remove	= a2dp_source_remove,
@@ -2505,6 +2506,7 @@ static struct btd_profile a2dp_sink_profile = {
 
 	.remote_uuid	= A2DP_SINK_UUID,
 	.local_uuid	= A2DP_SOURCE_UUID,
+	.auth_uuid	= ADVANCED_AUDIO_UUID,
 
 	.device_probe	= a2dp_sink_probe,
 	.device_remove	= a2dp_sink_remove,
