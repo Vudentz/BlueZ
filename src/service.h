@@ -65,6 +65,8 @@ uint16_t btd_service_get_version(const struct btd_service *service);
 void btd_service_set_auto_connect(struct btd_service *service, bool value);
 bool btd_service_get_auto_connect(const struct btd_service *service);
 
+void btd_service_set_blocked(struct btd_service *service, bool value);
+
 unsigned int btd_service_add_state_cb(btd_service_state_cb cb,
 							void *user_data);
 bool btd_service_remove_state_cb(unsigned int id);
