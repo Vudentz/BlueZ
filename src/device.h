@@ -69,6 +69,7 @@ gboolean device_is_paired(struct btd_device *device);
 gboolean device_is_bonded(struct btd_device *device);
 gboolean device_is_trusted(struct btd_device *device);
 void device_set_paired(struct btd_device *device, gboolean paired);
+bool device_is_service_blocked(struct btd_device *device, const char *uuid);
 void btd_device_set_temporary(struct btd_device *device, gboolean temporary);
 void btd_device_set_trusted(struct btd_device *device, gboolean trusted);
 void device_set_bonded(struct btd_device *device, gboolean bonded);
