@@ -56,6 +56,7 @@ struct btd_service {
 	btd_service_state_t	state;
 	int			err;
 	bool			auto_connect;
+	bool			blocked;
 };
 
 struct service_state_callback {
@@ -355,6 +356,11 @@ void btd_service_set_auto_connect(struct btd_service *service, bool value)
 bool btd_service_get_auto_connect(const struct btd_service *service)
 {
 	return service->auto_connect;
+}
+
+void btd_service_set_blocked(struct btd_service *service, bool value)
+{
+	service->blocked = value;
 }
 
 unsigned int btd_service_add_state_cb(btd_service_state_cb cb, void *user_data)
