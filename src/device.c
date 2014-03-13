@@ -3736,7 +3736,7 @@ static void device_set_auto_connect(struct btd_device *device, gboolean enable)
 {
 	char addr[18];
 
-	if (!device)
+	if (!device || !device_is_le(device))
 		return;
 
 	ba2str(&device->bdaddr, addr);
