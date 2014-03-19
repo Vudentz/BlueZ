@@ -566,25 +566,29 @@ gboolean device_is_trusted(struct btd_device *device)
 bool device_is_service_blocked(struct btd_device *device, const char *uuid)
 {
 	GSList *l;
+	bool block = false;
 
 	for (l = device->services; l; l = g_slist_next(l)) {
 		struct btd_service *service = l->data;
 		struct btd_profile *p = btd_service_get_profile(service);
+		const char *p_uuid;
 
-		if (p->auth_uuid && strcasecmp(uuid, p->auth_uuid))
+		p_uuid = p->auth_uuid ? p->auth_uuid : p->local_uuid;
+		if (!p_uuid)
 			continue;
 
-		if (!p->auth_uuid && strcasecmp(uuid, p->local_uuid))
+		if (strcasecmp(uuid, p_uuid))
 			continue;
 
 		if (!btd_service_is_blocked(service))
 			return false;
+
+		block = true;
 	}
 
-	/* Either every service matching is blocked or no service could be
-	 * found.
+	/* Every service matching is blocked
 	 */
-	return true;
+	return block;
 }
 
 static gboolean dev_property_get_address(const GDBusPropertyTable *property,
