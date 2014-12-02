@@ -3674,6 +3674,8 @@ void btd_device_set_temporary(struct btd_device *device, gboolean temporary)
 
 	if (temporary)
 		adapter_connect_list_remove(device->adapter, device);
+	else
+		store_device_info(device);
 
 	device->temporary = temporary;
 }
