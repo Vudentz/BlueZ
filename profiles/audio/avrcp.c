@@ -3866,7 +3866,7 @@ static void target_destroy(struct avrcp *session)
 	g_free(target);
 }
 
-static void session_destroy(struct avrcp *session)
+static void session_destroy(struct avrcp *session, int err)
 {
 	struct avrcp_server *server = session->server;
 	struct btd_service *service;
@@ -3878,7 +3878,7 @@ static void session_destroy(struct avrcp *session)
 	service = btd_device_get_service(session->dev, AVRCP_TARGET_UUID);
 	if (service != NULL) {
 		if (session->control_id == 0)
-			btd_service_connecting_complete(service, -EIO);
+			btd_service_connecting_complete(service, err);
 		else
 			btd_service_disconnecting_complete(service, 0);
 	}
@@ -3886,7 +3886,7 @@ static void session_destroy(struct avrcp *session)
 	service = btd_device_get_service(session->dev, AVRCP_REMOTE_UUID);
 	if (service != NULL) {
 		if (session->control_id == 0)
-			btd_service_connecting_complete(service, -EIO);
+			btd_service_connecting_complete(service, err);
 		else
 			btd_service_disconnecting_complete(service, 0);
 	}
@@ -3945,7 +3945,7 @@ static void state_changed(struct btd_device *device, avctp_state_t old_state,
 		if (session == NULL)
 			break;
 
-		session_destroy(session);
+		session_destroy(session, err);
 
 		break;
 	case AVCTP_STATE_CONNECTING:
