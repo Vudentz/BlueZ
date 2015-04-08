@@ -57,6 +57,7 @@ struct btd_service {
 	int			err;
 	bool			auto_connect;
 	bool			blocked;
+	bool			reconnecting;
 };
 
 struct service_state_callback {
@@ -101,6 +102,9 @@ static void change_state(struct btd_service *service, btd_service_state_t state,
 	service->state = state;
 	service->err = err;
 
+	if (state == BTD_SERVICE_STATE_CONNECTED)
+		service->reconnecting = false;
+
 	ba2str(device_get_address(service->device), addr);
 	DBG("%p: device %s profile %s state changed: %s -> %s (%d)", service,
 					addr, service->profile->name,
@@ -111,6 +115,10 @@ static void change_state(struct btd_service *service, btd_service_state_t state,
 
 		cb->cb(service, old, state, cb->user_data);
 	}
+
+	/* Change state back to connecting if reconnect flag is set */
+	if (service->reconnecting && state == BTD_SERVICE_STATE_DISCONNECTED)
+		change_state(service, BTD_SERVICE_STATE_CONNECTING, err);
 }
 
 struct btd_service *btd_service_ref(struct btd_service *service)
@@ -198,6 +206,8 @@ int btd_service_connect(struct btd_service *service)
 	case BTD_SERVICE_STATE_DISCONNECTED:
 		break;
 	case BTD_SERVICE_STATE_CONNECTING:
+		if (service->reconnecting)
+			break;
 	case BTD_SERVICE_STATE_CONNECTED:
 		return -EALREADY;
 	case BTD_SERVICE_STATE_DISCONNECTING:
@@ -280,6 +290,11 @@ void *btd_service_get_user_data(const struct btd_service *service)
 
 btd_service_state_t btd_service_get_state(const struct btd_service *service)
 {
+	/* Return connecting if reconnection policy is active */
+	if (service->state == BTD_SERVICE_STATE_DISCONNECTED &&
+							service->reconnecting)
+		return BTD_SERVICE_STATE_CONNECTING;
+
 	return service->state;
 }
 
@@ -387,4 +402,22 @@ void btd_service_disconnecting_complete(struct btd_service *service, int err)
 		change_state(service, BTD_SERVICE_STATE_DISCONNECTED, 0);
 	else /* If disconnect fails, we assume it remains connected */
 		change_state(service, BTD_SERVICE_STATE_CONNECTED, err);
+}
+
+void btd_service_reconnect(struct btd_service *service, bool value)
+{
+	service->reconnecting = value;
+
+	/* Don't change state if already connected */
+	if (service->state == BTD_SERVICE_STATE_CONNECTED)
+		return;
+
+	change_state(service, value ? BTD_SERVICE_STATE_CONNECTING :
+					BTD_SERVICE_STATE_DISCONNECTED,
+					value ? 0 : -EHOSTDOWN);
+}
+
+bool btd_service_is_reconnecting(struct btd_service *service)
+{
+	return service->reconnecting;
 }
