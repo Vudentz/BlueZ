@@ -76,3 +76,5 @@ void btd_service_connecting_complete(struct btd_service *service, int err);
 void btd_service_disconnecting_complete(struct btd_service *service, int err);
 void btd_service_set_user_data(struct btd_service *service, void *user_data);
 void *btd_service_get_user_data(const struct btd_service *service);
+void btd_service_reconnect(struct btd_service *service, bool value);
+bool btd_service_is_reconnecting(struct btd_service *service);
