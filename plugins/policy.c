@@ -449,6 +449,25 @@ static void target_cb(struct btd_service *service,
 	}
 }
 
+static void mark_service(void *data, void *user_data)
+{
+	struct btd_service *service = data;
+	bool value = GPOINTER_TO_UINT(user_data);
+
+	btd_service_reconnect(service, value);
+}
+
+static void reconnect_set_active(struct reconnect_data *reconnect, bool value)
+{
+	if (reconnect->active == value)
+		return;
+
+	reconnect->active = value;
+
+	g_slist_foreach(reconnect->services, mark_service,
+						GUINT_TO_POINTER(value));
+}
+
 static void reconnect_reset(struct reconnect_data *reconnect)
 {
 	reconnect->attempt = 0;
@@ -457,6 +476,8 @@ static void reconnect_reset(struct reconnect_data *reconnect)
 		g_source_remove(reconnect->timer);
 		reconnect->timer = 0;
 	}
+
+	reconnect_set_active(reconnect, false);
 }
 
 static bool reconnect_match(const char *uuid)
@@ -596,7 +617,6 @@ static void service_cb(struct btd_service *service,
 	 */
 	reconnect = reconnect_add(service);
 
-	reconnect->active = false;
 	reconnect_reset(reconnect);
 
 	/*
@@ -628,9 +648,6 @@ static gboolean reconnect_timeout(gpointer data)
 		return FALSE;
 	}
 
-	reconnect->active = true;
-	reconnect->attempt++;
-
 	return FALSE;
 }
 
@@ -639,12 +656,14 @@ static void reconnect_set_timer(struct reconnect_data *reconnect)
 	static int timeout = 0;
 
 	if (reconnect->attempt < reconnect_intervals_len)
-		timeout = reconnect_intervals[reconnect->attempt];
+		timeout = reconnect_intervals[reconnect->attempt++];
 
 	DBG("%d seconds", timeout);
 
 	reconnect->timer = g_timeout_add_seconds(timeout, reconnect_timeout,
 								reconnect);
+
+	reconnect_set_active(reconnect, true);
 }
 
 static void disconnect_cb(struct btd_device *dev, uint8_t reason)
@@ -678,8 +697,6 @@ static void conn_fail_cb(struct btd_device *dev, uint8_t status)
 
 	if (!reconnect->active)
 		return;
-
-	reconnect->active = false;
 
 	/* Give up if we were powered off */
 	if (status == MGMT_STATUS_NOT_POWERED) {
