@@ -51,6 +51,7 @@ static GSList *services = NULL;
 
 struct service_data {
 	struct btd_service *service;
+	btd_service_state_t state;
 	char *path;
 	DBusMessage *connect;
 	DBusMessage *disconnect;
@@ -132,10 +133,11 @@ static DBusMessage *service_connect(DBusConnection *conn, DBusMessage *msg,
 
 static const char *data_get_state(struct service_data *data)
 {
-	btd_service_state_t state = btd_service_get_state(data->service);
 	int err;
 
-	switch (state) {
+	data->state = btd_service_get_state(data->service);
+
+	switch (data->state) {
 	case BTD_SERVICE_STATE_UNAVAILABLE:
 		return "unavailable";
 	case BTD_SERVICE_STATE_DISCONNECTED:
@@ -419,8 +421,10 @@ static void service_cb(struct btd_service *service,
 		break;
 	}
 
-	g_dbus_emit_property_changed(btd_get_dbus_connection(), data->path,
-						SERVICE_INTERFACE, "State");
+	if (data->state != btd_service_get_state(service))
+		g_dbus_emit_property_changed(btd_get_dbus_connection(),
+						data->path, SERVICE_INTERFACE,
+						"State");
 }
 
 static int service_init(void)
