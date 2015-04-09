@@ -131,18 +131,22 @@ static DBusMessage *service_connect(DBusConnection *conn, DBusMessage *msg,
 
 static const char *data_get_state(struct service_data *data)
 {
+	struct btd_service *service = data->service;
 	int err;
 
-	data->state = btd_service_get_state(data->service);
+	data->state = btd_service_get_state(service);
 
 	switch (data->state) {
 	case BTD_SERVICE_STATE_UNAVAILABLE:
 		return "unavailable";
 	case BTD_SERVICE_STATE_DISCONNECTED:
+		if (btd_service_is_reconnecting(service))
+			return "reconnecting";
 		err = btd_service_get_error(data->service);
 		return err < 0 ? "error" : "disconnected";
 	case BTD_SERVICE_STATE_CONNECTING:
-		return "connecting";
+		return btd_service_is_reconnecting(service) ? "reconnecting" :
+								"connecting";
 	case BTD_SERVICE_STATE_CONNECTED:
 		return "connected";
 	case BTD_SERVICE_STATE_DISCONNECTING:
