@@ -3095,6 +3095,17 @@ static void avrcp_track_changed(struct avrcp *session,
 		avrcp_get_element_attributes(session);
 }
 
+static void avrcp_playback_pos_changed(struct avrcp *session,
+						struct avrcp_header *pdu)
+{
+	struct avrcp_player *player = session->controller->player;
+	struct media_player *mp = player->user_data;
+	uint32_t position;
+
+	position = bt_get_be32(&pdu->params[1]);
+	media_player_set_position(mp, position);
+}
+
 static void avrcp_batt_status_changed(struct avrcp *session,
 						struct avrcp_header *pdu)
 {
@@ -3203,6 +3214,9 @@ static gboolean avrcp_handle_event(struct avctp *conn,
 	case AVRCP_EVENT_TRACK_CHANGED:
 		avrcp_track_changed(session, pdu);
 		break;
+	case AVRCP_EVENT_PLAYBACK_POS_CHANGED:
+		avrcp_playback_pos_changed(session, pdu);
+		break;
 	case AVRCP_EVENT_BATT_STATUS_CHANGED:
 		avrcp_batt_status_changed(session, pdu);
 		break;
@@ -3237,6 +3251,14 @@ static void avrcp_register_notification(struct avrcp *session, uint8_t event)
 	pdu->pdu_id = AVRCP_REGISTER_NOTIFICATION;
 	pdu->packet_type = AVRCP_PACKET_TYPE_SINGLE;
 	pdu->params[0] = event;
+
+	/*
+	 * Set maximum interval possible for position changed as we only
+	 * use it to resync.
+	 */
+	if (event == AVRCP_EVENT_PLAYBACK_POS_CHANGED)
+		bt_put_be32(UINT32_MAX, &pdu->params[1]);
+
 	pdu->params_len = htons(AVRCP_REGISTER_NOTIFICATION_PARAM_LENGTH);
 
 	length = AVRCP_HEADER_LENGTH + ntohs(pdu->params_len);
@@ -3276,6 +3298,7 @@ static gboolean avrcp_get_capabilities_resp(struct avctp *conn,
 		switch (event) {
 		case AVRCP_EVENT_STATUS_CHANGED:
 		case AVRCP_EVENT_TRACK_CHANGED:
+		case AVRCP_EVENT_PLAYBACK_POS_CHANGED:
 		case AVRCP_EVENT_BATT_STATUS_CHANGED:
 		case AVRCP_EVENT_SETTINGS_CHANGED:
 		case AVRCP_EVENT_ADDRESSED_PLAYER_CHANGED:
