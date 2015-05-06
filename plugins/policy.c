@@ -655,8 +655,10 @@ static void reconnect_set_timer(struct reconnect_data *reconnect)
 {
 	static int timeout = 0;
 
+	reconnect->attempt++;
+
 	if (reconnect->attempt < reconnect_intervals_len)
-		timeout = reconnect_intervals[reconnect->attempt++];
+		timeout = reconnect_intervals[reconnect->attempt];
 
 	DBG("%d seconds", timeout);
 
