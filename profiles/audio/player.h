@@ -45,6 +45,7 @@ struct media_player;
 struct media_item;
 
 struct media_player_callback {
+	bool (*get_position) (struct media_player *mp, void *user_data);
 	bool (*set_setting) (struct media_player *mp, const char *key,
 				const char *value, void *user_data);
 	int (*play) (struct media_player *mp, void *user_data);

@@ -169,11 +169,16 @@ static gboolean get_position(const GDBusPropertyTable *property,
 					DBusMessageIter *iter, void *data)
 {
 	struct media_player *mp = data;
+	struct player_callback *cb = mp->cb;
 	uint32_t position;
 
 	position = media_player_get_position(mp);
 
 	dbus_message_iter_append_basic(iter, DBUS_TYPE_UINT32, &position);
+
+	/* Trigger a resync if position has drifted more than a sec */
+	if (abs(position - mp->position) > 1000)
+		cb->cbs->get_position(mp, cb->user_data);
 
 	return TRUE;
 }

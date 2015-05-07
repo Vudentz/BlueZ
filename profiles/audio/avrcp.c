@@ -2872,6 +2872,24 @@ done:
 	set_browsed_player(session, player);
 }
 
+
+static bool ct_get_position(struct media_player *mp, void *user_data)
+{
+	struct avrcp_player *player = user_data;
+	struct avrcp *session;
+
+	session = player->sessions->data;
+	if (session == NULL)
+		return false;
+
+	if (session->controller->version < 0x0103)
+		return false;
+
+	avrcp_get_play_status(session);
+
+	return true;
+}
+
 static bool ct_set_setting(struct media_player *mp, const char *key,
 					const char *value, void *user_data)
 {
@@ -3305,6 +3323,7 @@ static int ct_get_total_numberofitems(struct media_player *mp, const char *name,
 }
 
 static const struct media_player_callback ct_cbs = {
+	.get_position	= ct_get_position,
 	.set_setting	= ct_set_setting,
 	.play		= ct_play,
 	.pause		= ct_pause,
