@@ -2159,12 +2159,9 @@ static gboolean session_cb(GIOChannel *chan, GIOCondition cond,
 
 	DBG("");
 
-	if (cond & G_IO_NVAL)
-		return FALSE;
-
 	header = (void *) session->buf;
 
-	if (cond & (G_IO_HUP | G_IO_ERR))
+	if (cond & (G_IO_HUP | G_IO_ERR | G_IO_NVAL))
 		goto failed;
 
 	fd = g_io_channel_unix_get_fd(chan);
