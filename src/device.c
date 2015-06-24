@@ -1139,6 +1139,11 @@ void device_request_disconnect(struct btd_device *device, DBusMessage *msg)
 						do_disconnect, device);
 }
 
+bool device_is_disconnecting(struct btd_device *device)
+{
+	return device->disconn_timer > 0;
+}
+
 static DBusMessage *dev_disconnect(DBusConnection *conn, DBusMessage *msg,
 							void *user_data)
 {
