@@ -2773,29 +2773,27 @@ static void update_bredr_services(struct browse_req *req, sdp_list_t *recs)
 	char srcaddr[18], dstaddr[18];
 	char sdp_file[PATH_MAX + 1];
 	char att_file[PATH_MAX + 1];
-	GKeyFile *sdp_key_file = NULL;
-	GKeyFile *att_key_file = NULL;
+	GKeyFile *sdp_key_file;
+	GKeyFile *att_key_file;
 	char *data;
 	gsize length = 0;
 
 	ba2str(btd_adapter_get_address(device->adapter), srcaddr);
 	ba2str(&device->bdaddr, dstaddr);
 
-	if (!device->temporary) {
-		snprintf(sdp_file, PATH_MAX, STORAGEDIR "/%s/cache/%s",
-							srcaddr, dstaddr);
-		sdp_file[PATH_MAX] = '\0';
+	snprintf(sdp_file, PATH_MAX, STORAGEDIR "/%s/cache/%s", srcaddr,
+								dstaddr);
+	sdp_file[PATH_MAX] = '\0';
 
-		sdp_key_file = g_key_file_new();
-		g_key_file_load_from_file(sdp_key_file, sdp_file, 0, NULL);
+	sdp_key_file = g_key_file_new();
+	g_key_file_load_from_file(sdp_key_file, sdp_file, 0, NULL);
 
-		snprintf(att_file, PATH_MAX, STORAGEDIR "/%s/%s/attributes",
-							srcaddr, dstaddr);
-		att_file[PATH_MAX] = '\0';
+	snprintf(att_file, PATH_MAX, STORAGEDIR "/%s/%s/attributes", srcaddr,
+								dstaddr);
+	att_file[PATH_MAX] = '\0';
 
-		att_key_file = g_key_file_new();
-		g_key_file_load_from_file(att_key_file, att_file, 0, NULL);
-	}
+	att_key_file = g_key_file_new();
+	g_key_file_load_from_file(att_key_file, att_file, 0, NULL);
 
 	for (seq = recs; seq; seq = seq->next) {
 		sdp_record_t *rec = (sdp_record_t *) seq->data;
