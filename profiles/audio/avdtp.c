@@ -3604,6 +3604,13 @@ int avdtp_abort(struct avdtp *session, struct avdtp_stream *stream)
 	struct seid_req req;
 	int ret;
 
+	if (!stream && session->discover) {
+		/* Don't call cb since it being aborted */
+		session->discover->cb = NULL;
+		finalize_discovery(session, -ECANCELED);
+		return -EALREADY;
+	}
+
 	if (!g_slist_find(session->streams, stream))
 		return -EINVAL;
 
