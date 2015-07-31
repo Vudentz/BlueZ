@@ -3479,7 +3479,7 @@ static void target_init(struct avrcp *session)
 				(1 << AVRCP_EVENT_TRACK_REACHED_END) |
 				(1 << AVRCP_EVENT_SETTINGS_CHANGED);
 
-	if (target->version < 0x0104)
+	if (target->version < 0x0103)
 		return;
 
 	/* Only check capabilities if controller is not supported */
