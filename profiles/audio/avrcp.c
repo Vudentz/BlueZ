@@ -1644,7 +1644,7 @@ static const struct control_pdu_handler control_handlers[] = {
 					NULL },
 		{ AVRCP_DISPLAYABLE_CHARSET, AVC_CTYPE_STATUS,
 					avrcp_handle_displayable_charset },
-		{ AVRCP_CT_BATTERY_STATUS, AVC_CTYPE_STATUS,
+		{ AVRCP_CT_BATTERY_STATUS, AVC_CTYPE_CONTROL,
 					avrcp_handle_ct_battery_status },
 		{ AVRCP_GET_PLAY_STATUS, AVC_CTYPE_STATUS,
 					avrcp_handle_get_play_status },
