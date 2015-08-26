@@ -1855,11 +1855,125 @@ err_metadata:
 	return AVRCP_HEADER_LENGTH + 1;
 }
 
+struct get_folder_items_rsp {
+	uint8_t status;
+	uint16_t uid_counter;
+	uint16_t num_items;
+	uint8_t data[0];
+} __attribute__ ((packed));
+
+struct folder_item {
+	uint8_t type;
+	uint16_t len;
+	uint8_t data[0];
+} __attribute__ ((packed));
+
+struct player_item {
+	uint16_t id;
+	uint8_t type;
+	uint32_t subtype;
+	uint8_t status;
+	uint8_t features[16];
+	uint16_t charset;
+	uint16_t namelen;
+	char name[0];
+} __attribute__ ((packed));
+
+static void avrcp_handle_get_folder_items(struct avrcp *session,
+					struct avrcp_browsing_header *pdu,
+					uint8_t transaction)
+{
+	struct avrcp_player *player = session->target->player;
+	struct get_folder_items_rsp *rsp;
+	uint32_t start_item, end_item;
+	uint8_t scope;
+	GSList *l;
+	const char *name = "Player";
+
+	if (!pdu || ntohs(pdu->param_len) < 10)
+		goto reject;
+
+	scope = pdu->params[0];
+	start_item = bt_get_be32(&pdu->params[1]);
+	end_item = bt_get_be32(&pdu->params[5]);
+
+	DBG("scope 0x%02x start_item 0x%08x end_item 0x%08x", scope, start_item,
+								end_item);
+
+	/* Only accept Media Player List scope */
+	if (scope != 0x00 || start_item > end_item)
+		goto reject;
+
+	/* If there is no player return an error */
+	if (!session->server->players) {
+		pdu->params[0] = AVRCP_STATUS_NO_AVAILABLE_PLAYERS;
+		pdu->param_len = htons(1);
+		return;
+	}
+
+	rsp = (void *)pdu->params;
+	rsp->status = AVRCP_STATUS_SUCCESS;
+	rsp->uid_counter = htons(player_get_uid_counter(player));
+	rsp->num_items = 0;
+	pdu->param_len = sizeof(*rsp);
+
+	for (l = g_slist_nth(session->server->players, start_item); l;
+							l = g_slist_next(l)) {
+		struct avrcp_player *player = l->data;
+		struct folder_item *folder;
+		struct player_item *item;
+		uint16_t namelen;
+
+		/* Check if past the end item */
+		if (rsp->num_items == (end_item - start_item) + 1)
+			break;
+
+		folder = (void *)&pdu->params[pdu->param_len];
+		folder->type = 0x01; /* Media Player */
+
+		pdu->param_len += sizeof(*folder);
+
+		item = (void *)folder->data;
+		item->id = htons(player->id);
+		item->type = 0x01; /* Audio */
+		item->subtype = 0x01; /* Audio Book */
+		item->status = player_get_status(player);
+		memset(item->features, 0x00, sizeof(item->features));
+		memset(item->features, 0xff, 7);
+		item->charset = htons(106); /* UTF-8 */
+
+		namelen = strlen(name);
+		item->namelen = htons(namelen);
+		memcpy(item->name, name, namelen);
+
+		folder->len = htons(sizeof(*item) + namelen);
+		pdu->param_len += sizeof(*item) + namelen;
+		rsp->num_items++;
+	}
+
+	/* If no player could be found respond with and error */
+	if (!rsp->num_items) {
+		pdu->params[0] = AVRCP_STATUS_OUT_OF_BOUNDS;
+		pdu->param_len = htons(1);
+		return;
+	}
+
+	rsp->num_items = htons(rsp->num_items);
+	pdu->param_len = htons(pdu->param_len);
+
+	return;
+
+reject:
+	pdu->params[0] = AVRCP_STATUS_INVALID_PARAM;
+	pdu->param_len = htons(1);
+}
+
 static struct browsing_pdu_handler {
 	uint8_t pdu_id;
-	void (*func) (struct avrcp *session, struct avrcp_browsing_header *pdu,
-							uint8_t transaction);
+	void (*func) (struct avrcp *session,
+			struct avrcp_browsing_header *pdu, uint8_t transaction);
 } browsing_handlers[] = {
+		{ AVRCP_GET_FOLDER_ITEMS, avrcp_handle_get_folder_items },
 		{ },
 };
 
