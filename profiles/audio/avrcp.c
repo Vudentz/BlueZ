@@ -134,6 +134,8 @@
 #define AVRCP_CHARSET_UTF8		106
 
 #define AVRCP_BROWSING_TIMEOUT		1
+#define AVRCP_CT_VERSION		0x0105
+#define AVRCP_TG_VERSION		0x0105
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
 
@@ -273,7 +275,7 @@ static sdp_record_t *avrcp_ct_record(void)
 	sdp_record_t *record;
 	sdp_data_t *psm[2], *version, *features;
 	uint16_t lp = AVCTP_CONTROL_PSM, ap = AVCTP_BROWSING_PSM;
-	uint16_t avrcp_ver = 0x0105, avctp_ver = 0x0103;
+	uint16_t avctp_ver = 0x0103;
 	uint16_t feat = ( AVRCP_FEATURE_CATEGORY_1 |
 						AVRCP_FEATURE_CATEGORY_2 |
 						AVRCP_FEATURE_CATEGORY_3 |
@@ -328,7 +330,7 @@ static sdp_record_t *avrcp_ct_record(void)
 
 	/* Bluetooth Profile Descriptor List */
 	sdp_uuid16_create(&profile[0].uuid, AV_REMOTE_PROFILE_ID);
-	profile[0].version = avrcp_ver;
+	profile[0].version = AVRCP_CT_VERSION;
 	pfseq = sdp_list_append(NULL, &profile[0]);
 	sdp_set_profile_descs(record, pfseq);
 
@@ -366,7 +368,7 @@ static sdp_record_t *avrcp_tg_record(void)
 	sdp_list_t *aproto_browsing, *proto_browsing[2] = {0};
 	uint16_t lp = AVCTP_CONTROL_PSM;
 	uint16_t lp_browsing = AVCTP_BROWSING_PSM;
-	uint16_t avrcp_ver = 0x0104, avctp_ver = 0x0103;
+	uint16_t avctp_ver = 0x0103;
 	uint16_t feat = ( AVRCP_FEATURE_CATEGORY_1 |
 					AVRCP_FEATURE_CATEGORY_2 |
 					AVRCP_FEATURE_CATEGORY_3 |
@@ -416,7 +418,7 @@ static sdp_record_t *avrcp_tg_record(void)
 
 	/* Bluetooth Profile Descriptor List */
 	sdp_uuid16_create(&profile[0].uuid, AV_REMOTE_PROFILE_ID);
-	profile[0].version = avrcp_ver;
+	profile[0].version = AVRCP_TG_VERSION;
 	pfseq = sdp_list_append(NULL, &profile[0]);
 	sdp_set_profile_descs(record, pfseq);
 
@@ -4188,7 +4190,7 @@ done:
 
 static struct btd_profile avrcp_controller_profile = {
 	.name		= "avrcp-controller",
-	.version	= 0x0104,
+	.version	= 0x0105,
 
 	.remote_uuid	= AVRCP_REMOTE_UUID,
 	.local_uuid	= AVRCP_TARGET_UUID,
