@@ -3930,9 +3930,10 @@ void avrcp_unregister_player(struct avrcp_player *player)
 			target->player = g_slist_nth_data(server->players, 0);
 	}
 
-	player_destroy(player);
 	avrcp_player_event(player,
 				AVRCP_EVENT_AVAILABLE_PLAYERS_CHANGED, NULL);
+
+	player_destroy(player);
 }
 
 static gboolean avrcp_handle_set_volume(struct avctp *conn, uint8_t code,
