@@ -1324,19 +1324,37 @@ static uint8_t avrcp_handle_displayable_charset(struct avrcp *session,
 	return AVC_CTYPE_STABLE;
 }
 
+static void battery_status_changed(struct avrcp *session, uint8_t status)
+{
+	struct btd_service *service;
+	const char *valstr;
+	uint8_t value;
+
+	valstr = battery_status_to_str(status);
+	if (valstr == NULL)
+		return;
+
+	DBG("%s", valstr);
+
+	service = btd_device_get_service(session->dev, AVRCP_REMOTE_UUID);
+	if (service == NULL)
+		return;
+
+	value = battery_status_to_percent(status);
+
+	control_set_battery_status(service, value);
+}
+
 static uint8_t avrcp_handle_ct_battery_status(struct avrcp *session,
 						struct avrcp_header *pdu,
 						uint8_t transaction)
 {
 	uint16_t len = ntohs(pdu->params_len);
-	const char *valstr;
 
 	if (len != 1)
 		goto err;
 
-	valstr = battery_status_to_str(pdu->params[0]);
-	if (valstr == NULL)
-		goto err;
+	battery_status_changed(session, pdu->params[0]);
 
 	pdu->params_len = 0;
 
@@ -3635,16 +3653,7 @@ static void avrcp_playback_pos_changed(struct avrcp *session,
 static void avrcp_batt_status_changed(struct avrcp *session,
 						struct avrcp_header *pdu)
 {
-	struct btd_service *service;
-	uint8_t value;
-
-	service = btd_device_get_service(session->dev, AVRCP_REMOTE_UUID);
-	if (service == NULL)
-		return;
-
-	value = battery_status_to_percent(pdu->params[0]);
-
-	control_set_battery_status(service, value);
+	battery_status_changed(session, pdu->params[1]);
 }
 
 static void avrcp_setting_changed(struct avrcp *session,
