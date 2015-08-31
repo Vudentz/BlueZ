@@ -120,10 +120,11 @@ Properties
 
 			Addressed Player object path.
 
-		string Battery [readonly]
+		byte Battery [readonly]
 
-			Possible values: "normal", "warning", "critical",
-			"external", "fullcharge"
+			Battery level.
+
+			Possible values: 0 - 100
 
 MediaPlayer1 hierarchy
 ======================
