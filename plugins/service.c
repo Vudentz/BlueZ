@@ -440,7 +440,8 @@ static void service_exit(void)
 
 	btd_service_remove_state_cb(service_id);
 
-	g_slist_free_full(services, data_free);
+	while (services)
+		data_remove(services->data);
 }
 
 BLUETOOTH_PLUGIN_DEFINE(service, VERSION, BLUETOOTH_PLUGIN_PRIORITY_DEFAULT,
