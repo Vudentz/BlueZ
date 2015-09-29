@@ -1194,6 +1194,11 @@ struct media_player *media_player_controller_create(const char *path,
 	return mp;
 }
 
+const char *media_player_get_path(struct media_player *mp)
+{
+	return mp->path;
+}
+
 void media_player_set_duration(struct media_player *mp, uint32_t duration)
 {
 	char *value, *curval;
