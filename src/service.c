@@ -208,6 +208,7 @@ int btd_service_connect(struct btd_service *service)
 	case BTD_SERVICE_STATE_CONNECTING:
 		if (service->reconnecting)
 			break;
+		return 0;
 	case BTD_SERVICE_STATE_CONNECTED:
 		return -EALREADY;
 	case BTD_SERVICE_STATE_DISCONNECTING:
@@ -243,6 +244,7 @@ int btd_service_disconnect(struct btd_service *service)
 	case BTD_SERVICE_STATE_DISCONNECTING:
 		return -EALREADY;
 	case BTD_SERVICE_STATE_CONNECTING:
+		return 0;
 	case BTD_SERVICE_STATE_CONNECTED:
 		break;
 	}
