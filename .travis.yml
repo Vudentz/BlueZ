@@ -1,0 +1,59 @@
+env:
+  global:
+   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+   #   via the "travis encrypt" command using the project repo's public key
+   - secure: "gMirrQlNQzv5wO2iRudvo3p1mp4l41YoTD7uAwBJRTGvvZNEzwafWhilHBwAcg1Pmduhxsvb2z5Y8UwwnHD7zAz4Ov9ZFExWb455ODU7wajhBh/cOLftQtdYyoeEJmg0p1kpg3Hg/EpxvSAT4H+3QF9ZVA5zggrAW4ILQVS4X/kuolvynq6bd57FCMzMrkyKRU1ia+j/9cY1vZvkTzUFUiotqA1kVJrWmyjxKEl43etxbKPWXlx5y84UsNYcAYPEc3UEy9O/yfM3fB4kKWiYA/fo0/cc9z94KJH8oRmfu1UANAPWnqFmQ63g58V6wVAh1o5hmBwCdXZlP8vdTq1iTwO6N6AgZXzoSo0mdReG+v3ajwCuJ4cAkmiBX85XjTEOnaKCe4+FXl9gFIe9n7jfMpjT3Eb/rAEc4f3U6eGTScHUST8jkf5YRgOUxFMQ10X7vF0xmh+Y6oawZaJA9GXJF9UWWvAXut6pLYYzwzLZLpI+/auOTN6bE/InOaRB5/RBt6eONc9v/GWc/nOlH+Qs403NvRbfewIHqsVshhNB5QR+zZbL77l3C8h4hTpRbyM8FeLNxq7q+dJmrZIbrJjuVBufsRiLwr7SKEFNWSGDZm6LBWkvZdwkU1Ud++8xj97W0bd69+CdRZTN7YxuTWkOab/x1PPPfq/gyapgQIkqrCQ="
+
+sudo: required
+dist: trusty
+
+language: c
+
+compiler:
+  - gcc
+  - clang
+
+matrix:
+  allow_failures:
+   - compiler: clang
+
+before_install:
+  - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
+  - sudo apt-get -qq -y update
+  - >
+    sudo apt-get -qq -y install
+    git-core
+    autopoint
+    autoconf
+    automake
+    intltool
+    bison
+    check
+    flex
+    libcap-ng-dev
+    libdbus-glib-1-dev
+    libglib2.0-dev
+    libical-dev
+    libreadline-dev
+    libudev-dev
+    libdw-dev
+    lcov
+    libasound2-dev
+
+addons:
+  coverity_scan:
+    project:
+      name: "Vudentz/BlueZ"
+      description: "Build submitted via Travis CI"
+    notification_email: luiz.von.dentz@intel.com
+    build_command_prepend: "./bootstrap-configure --disable-systemd --disable-android --disable-tools; make clean"
+    build_command:   "make -j 4"
+    branch_pattern: coverity_scan
+
+script:
+  - ./bootstrap-configure --disable-systemd --disable-android
+  - make && make check && make install DESTDIR=`mktemp -d`
+  - make coverage
+
+after_failure: cat test-suite.log
+after_success: bash <(curl -s https://codecov.io/bash)
