@@ -3621,7 +3621,7 @@ static gboolean avrcp_get_capabilities_resp(struct avctp *conn, uint8_t code,
 		}
 	}
 
-	if (!session->controller)
+	if (!session->controller || !session->controller->player)
 		return FALSE;
 
 	if (!(events & (1 << AVRCP_EVENT_SETTINGS_CHANGED)))
