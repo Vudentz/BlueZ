@@ -84,10 +84,29 @@ struct policy_data {
 	guint tg_timer;
 };
 
+static struct reconnect_data *reconnect_find(struct btd_device *dev)
+{
+	GSList *l;
+
+	for (l = reconnects; l; l = g_slist_next(l)) {
+		struct reconnect_data *reconnect = l->data;
+
+		if (reconnect->dev == dev)
+			return reconnect;
+	}
+
+	return NULL;
+}
+
 static void policy_connect(struct policy_data *data,
 						struct btd_service *service)
 {
 	struct btd_profile *profile = btd_service_get_profile(service);
+	struct reconnect_data *reconnect;
+
+	reconnect = reconnect_find(btd_service_get_device(service));
+	if (reconnect && reconnect->active)
+		return;
 
 	DBG("%s profile %s", btd_device_get_path(data->dev), profile->name);
 
@@ -492,20 +511,6 @@ static bool reconnect_match(const char *uuid)
 	return false;
 }
 
-static struct reconnect_data *reconnect_find(struct btd_device *dev)
-{
-	GSList *l;
-
-	for (l = reconnects; l; l = g_slist_next(l)) {
-		struct reconnect_data *reconnect = l->data;
-
-		if (reconnect->dev == dev)
-			return reconnect;
-	}
-
-	return NULL;
-}
-
 static struct reconnect_data *reconnect_add(struct btd_service *service)
 {
 	struct btd_device *dev = btd_service_get_device(service);
@@ -655,10 +660,13 @@ static void reconnect_set_timer(struct reconnect_data *reconnect)
 {
 	static int timeout = 0;
 
+	reconnect->active = true;
+
 	if (reconnect->attempt < reconnect_intervals_len)
 		timeout = reconnect_intervals[reconnect->attempt];
 
-	DBG("%d seconds", timeout);
+	DBG("attempt %d/%d %d seconds", reconnect->attempt + 1,
+						reconnect_attempts, timeout);
 
 	reconnect->timer = g_timeout_add_seconds(timeout, reconnect_timeout,
 								reconnect);
