@@ -653,6 +653,8 @@ static gboolean reconnect_timeout(gpointer data)
 		return FALSE;
 	}
 
+	reconnect->attempt++;
+
 	return FALSE;
 }
 
