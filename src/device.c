@@ -1761,6 +1761,10 @@ int btd_device_connect_services(struct btd_device *dev, GSList *services)
 	for (l = services; l; l = g_slist_next(l)) {
 		struct btd_service *service = l->data;
 
+		/* Skip if service is blocked */
+		if (btd_service_is_blocked(service))
+			continue;
+
 		dev->pending = g_slist_append(dev->pending, service);
 	}
 
