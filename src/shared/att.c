@@ -30,6 +30,7 @@
 #define ATT_OP_CMD_MASK			0x40
 #define ATT_OP_SIGNED_MASK		0x80
 #define ATT_TIMEOUT_INTERVAL		30000  /* 30000 ms */
+#define EATT_TIMEOUT_INTERVAL		5000  /* 5000 ms */
 
 /* Length of signature in write signed packet */
 #define BT_ATT_SIGNATURE_LEN		12
@@ -42,6 +43,7 @@ struct bt_att_chan {
 	struct io *io;
 	uint8_t type;
 	int sec_level;			/* Only used for non-L2CAP */
+	int timeout;
 
 	struct queue *queue;		/* Channel dedicated queue */
 
@@ -476,6 +478,8 @@ struct timeout_data {
 	unsigned int id;
 };
 
+static void wakeup_writer(struct bt_att *att);
+
 static bool timeout_cb(void *user_data)
 {
 	struct timeout_data *timeout = user_data;
@@ -501,7 +505,16 @@ static bool timeout_cb(void *user_data)
 		att->timeout_callback(op->id, op->opcode, att->timeout_data);
 
 	op->timeout_id = 0;
-	disc_att_send_op(op);
+
+	/* Resend op if it is using EATT bearer and there are more channels
+	 * left that could be used since there maybe a problem with the channel
+	 * e.g. not enough credits to send the entire packet.
+	 */
+	if (chan->type == BT_ATT_EATT && queue_length(att->chans) > 1) {
+		queue_push_tail(att->req_queue, op);
+		wakeup_writer(att);
+	} else
+		disc_att_send_op(op);
 
 	/*
 	 * Directly terminate the connection as required by the ATT protocol.
@@ -591,8 +604,7 @@ static bool can_write_data(struct io *io, void *user_data)
 	timeout = new0(struct timeout_data, 1);
 	timeout->chan = chan;
 	timeout->id = op->id;
-	op->timeout_id = timeout_add(ATT_TIMEOUT_INTERVAL, timeout_cb,
-								timeout, free);
+	op->timeout_id = timeout_add(chan->timeout, timeout_cb, timeout, free);
 
 	/* Return true as there may be more operations ready to write. */
 	return true;
@@ -1261,9 +1273,16 @@ static struct bt_att_chan *bt_att_chan_new(int fd, uint8_t type)
 		/* fall through */
 	case BT_ATT_LE:
 		chan->mtu = BT_ATT_DEFAULT_LE_MTU;
+		chan->timeout = ATT_TIMEOUT_INTERVAL;
 		break;
-	default:
+	case BT_ATT_BREDR:
 		chan->mtu = io_get_mtu(chan->fd);
+		chan->timeout = ATT_TIMEOUT_INTERVAL;
+		break;
+	case BT_ATT_EATT:
+		chan->mtu = io_get_mtu(chan->fd);
+		chan->timeout = EATT_TIMEOUT_INTERVAL;
+		break;
 	}
 
 	if (chan->mtu < BT_ATT_DEFAULT_LE_MTU)
