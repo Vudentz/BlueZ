@@ -155,6 +155,7 @@ struct transport {
 	uint32_t seq;
 	struct io *timer_io;
 	int num;
+	bool retry;
 };
 
 struct transport_select_args {
@@ -5798,6 +5799,25 @@ static int transport_send_seq(struct transport *transport, int fd, uint32_t num)
 	return i;
 }
 
+static bool transport_timer_read(struct io *io, void *user_data);
+
+static void transport_send_retry(const char *input, void *user_data)
+{
+	struct transport *transport = user_data;
+
+	if (!strcasecmp(input, "a") || !strcasecmp(input, "always")) {
+		transport->retry = true;
+		io_set_read_handler(transport->timer_io, transport_timer_read,
+						transport, NULL);
+	} else if ((!strcasecmp(input, "y") || !strcasecmp(input, "yes"))) {
+		io_set_read_handler(transport->timer_io, transport_timer_read,
+						transport, NULL);
+	} else {
+		io_destroy(transport->timer_io);
+		transport->timer_io = NULL;
+	}
+}
+
 static bool transport_timer_read(struct io *io, void *user_data)
 {
 	struct transport *transport = user_data;
@@ -5834,6 +5854,24 @@ static bool transport_timer_read(struct io *io, void *user_data)
 
 	ret = transport_send_seq(transport, transport->fd, transport->num);
 	if (ret < 0) {
+		if (ret == -EINVAL) {
+			const char *path;
+
+			if (transport->retry)
+				return true;
+
+			path = g_dbus_proxy_get_path(transport->proxy);
+
+			/* Prompt user if he wants to retry sending since the
+			 * stream may resume while waiting for user input.
+			 */
+			bt_shell_prompt_input(path,
+					"Data cannot be sent at constant rate, "
+					"retry? (no/yes/always):",
+					transport_send_retry, transport);
+			return false;
+		}
+
 		bt_shell_printf("Unable to send: %s (%d)\n",
 					strerror(-ret), ret);
 		return false;
