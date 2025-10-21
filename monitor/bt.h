@@ -253,6 +253,104 @@ struct bt_ll_feature_ext_rsp {
 	uint8_t  features[24];
 } __attribute__ ((packed));
 
+#define BT_LL_REFRESH_ENC_IND	0xe4
+struct bt_ll_refresh_enc_ind {
+	uint8_t  mic_len;
+	uint16_t instant;
+} __attribute__ ((packed));
+
+#define BT_LL_REFRESH_ENC_RSP	0xe5
+struct bt_ll_refresh_enc_rsp {
+	uint8_t  flags;
+} __attribute__ ((packed));
+
+#define BT_LL_REFRESH_ENC_REQ	0xe6
+struct bt_ll_refresh_enc_req {
+	uint8_t  flags;
+} __attribute__ ((packed));
+
+#define BT_LL_ENC_ECDH_RSP	0xe7
+struct bt_ll_enc_ecdh_rsp {
+	uint8_t flags;
+	uint8_t rand[16];
+	uint8_t key_type;
+	uint8_t pubkey[64];
+} __attribute__ ((packed));
+
+#define BT_LL_ENC_ECDH_REQ	0xe8
+struct bt_ll_enc_ecdh_req {
+	uint8_t flags;
+	uint8_t rand[16];
+	uint8_t key_type;
+	uint8_t pubkey[64];
+} __attribute__ ((packed));
+
+#define BT_LL_CIS_IND_V2	0xe9
+struct bt_ll_cis_ind_v2 {
+	uint32_t addr;
+	uint8_t  cis_offset[3];
+	uint8_t  cig_sync_delay[3];
+	uint8_t  cis_sync_delay[3];
+	uint16_t conn_event_count;
+	uint8_t  pca_h;
+} __attribute__ ((packed));
+
+#define BT_LL_PHY_UPDATE_IND_V2	0xf6
+struct bt_ll_phy_update_ind_v2 {
+	uint8_t  c_phy;
+	uint8_t  p_phy;
+	uint16_t instant;
+	uint8_t  address[5];
+} __attribute__ ((packed));
+
+#define BT_LL_HDT_CONFIG_RSP	0xf7
+struct bt_ll_hdt_config_rsp {
+	uint8_t  wincfg;
+	uint16_t acl_rx_rates;
+	uint16_t acl_rx_mtu;
+} __attribute__ ((packed));
+
+#define BT_LL_HDT_CONFIG_REQ	0xf8
+struct bt_ll_hdt_config_req {
+	uint8_t  wincfg;
+	uint16_t acl_rx_rates;
+	uint16_t acl_rx_mtu;
+} __attribute__ ((packed));
+
+#define BT_LL_HDT_LQF_REPORTING_IND 0xf9
+struct bt_ll_hdt_lqf_ind {
+	uint8_t  transport;
+} __attribute__ ((packed));
+
+#define BT_LL_CIS_REQ_V3	0xfa
+struct bt_ll_cis_req_v3 {
+	uint8_t  cig;
+	uint8_t  cis;
+	uint8_t  c_phy;
+	uint8_t  p_phy;
+	uint16_t c_sdu;
+	uint16_t p_sdu;
+	uint8_t  c_interval[3];
+	uint8_t  p_interval[3];
+	uint8_t  c_pdu;
+	uint8_t  p_pdu;
+	uint8_t  nse;
+	uint8_t  sub_interval[3];
+	uint8_t  bn;
+	uint8_t  c_ft;
+	uint8_t  p_ft;
+	uint16_t iso_interval;
+	uint8_t  offset_min[3];
+	uint8_t  offset_max[3];
+	uint16_t conn_event_count;
+	uint16_t c_rates;
+	uint16_t p_rates;
+	uint8_t  config_id;
+	uint8_t  tl_group_id;
+	uint8_t  wincfg;
+} __attribute__ ((packed));
+
+
 #define LMP_ESC4(x) ((127 << 8) | (x))
 
 #define BT_LMP_NAME_REQ			1
