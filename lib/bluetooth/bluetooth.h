@@ -229,6 +229,50 @@ struct bt_iso_qos {
 	};
 };
 
+struct bt_iso_io_qos_v2 {
+	uint32_t interval;
+	uint16_t latency;
+	uint16_t sdu;
+	uint8_t  phys;
+	uint8_t  rtn;
+	uint16_t rates;
+};
+
+struct bt_iso_ucast_qos_v2 {
+	uint8_t  cig;
+	uint8_t  cis;
+	uint8_t  sca;
+	uint8_t  packing;
+	uint8_t  framing;
+	struct bt_iso_io_qos_v2 in;
+	struct bt_iso_io_qos_v2 out;
+};
+
+struct bt_iso_bcast_qos_v2 {
+	uint8_t  big;
+	uint8_t  bis;
+	uint8_t  sync_factor;
+	uint8_t  packing;
+	uint8_t  framing;
+	struct bt_iso_io_qos_v2 in;
+	struct bt_iso_io_qos_v2 out;
+	uint8_t  encryption;
+	uint8_t  bcode[16];
+	uint8_t  options;
+	uint16_t skip;
+	uint16_t sync_timeout;
+	uint8_t  sync_cte_type;
+	uint8_t  mse;
+	uint16_t timeout;
+};
+
+struct bt_iso_qos_v2 {
+	union {
+		struct bt_iso_ucast_qos_v2 ucast;
+		struct bt_iso_bcast_qos_v2 bcast;
+	};
+};
+
 #define BT_CODEC		19
 struct bt_codec {
 	uint8_t id;
