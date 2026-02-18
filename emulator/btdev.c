@@ -2017,6 +2017,24 @@ static int cmd_set_conn_encrypt(struct btdev *dev, const void *data,
 	return 0;
 }
 
+static void encrypt_change_v3(struct btdev_conn *conn, uint8_t mode,
+					uint8_t status)
+{
+	struct bt_hci_evt_encrypt_change_v3 ev;
+
+	if (!conn)
+		return;
+
+	memset(&ev, 0, sizeof(ev));
+
+	ev.status = status;
+	ev.handle = cpu_to_le16(conn->handle);
+	ev.mode = mode;
+	ev.key_size = 16;
+
+	send_event(conn->dev, BT_HCI_EVT_ENCRYPT_CHANGE_V3, &ev, sizeof(ev));
+}
+
 static void encrypt_change(struct btdev_conn *conn, uint8_t mode,
 					uint8_t status)
 {
@@ -2024,6 +2042,12 @@ static void encrypt_change(struct btdev_conn *conn, uint8_t mode,
 
 	if (!conn)
 		return;
+
+	/* Check if BT_HCI_EVT_ENCRYPT_CHANGE_V3 has been enabled in the event
+	 * mask.
+	 */
+	if (conn->dev->event_mask[7] & BIT(5))
+		return encrypt_change_v3(conn, mode, status);
 
 	memset(&ev, 0, sizeof(ev));
 
@@ -8352,6 +8376,38 @@ done:
 	CMD(BT_HCI_CMD_LE_SET_HDT_DEFAULT_PARAMS, cmd_set_hdt_default_params, \
 					NULL)
 
+static int cmd_le_enable_encrypt_v2(struct btdev *dev, const void *data,
+							uint8_t len)
+{
+	const struct bt_hci_cmd_le_enable_encrypt_v2 *cmd = data;
+	struct bt_hci_evt_le_long_term_key_request ev;
+	struct btdev_conn *conn;
+
+	conn = queue_find(dev->conns, match_handle,
+				UINT_TO_PTR(le16_to_cpu(cmd->handle)));
+	if (!conn) {
+		cmd_status(dev, BT_HCI_ERR_UNKNOWN_CONN_ID,
+				BT_HCI_CMD_LE_START_ENCRYPT);
+		return 0;
+	}
+
+	cmd_status(dev, BT_HCI_ERR_SUCCESS, BT_HCI_CMD_LE_START_ENCRYPT);
+
+	memcpy(dev->le_ltk, cmd->ltk, 16);
+
+	ev.handle = cpu_to_le16(conn->handle);
+	ev.ediv = cmd->ediv;
+	ev.rand = cmd->rand;
+
+	le_meta_event(conn->link->dev, BT_HCI_EVT_LE_LONG_TERM_KEY_REQUEST, &ev,
+					sizeof(ev));
+
+	return 0;
+}
+
+#define CMD_EKS \
+	CMD(BT_HCI_CMD_LE_ENABLE_ENCRYPT_V2, cmd_le_enable_encrypt_v2, NULL)
+
 static const struct btdev_cmd cmd_hdt[] = {
 	CMD_COMMON_ALL,
 	CMD_COMMON_BREDR_LE,
@@ -8363,11 +8419,13 @@ static const struct btdev_cmd cmd_hdt[] = {
 	CMD_LE_52,
 	CMD_LE_60,
 	CMD_HDT,
+	CMD_EKS,
 	{}
 };
 
 static void set_hdt_commands(struct btdev *btdev)
 {
+	btdev->commands[60] |= BIT(0);	/* LE Enable Encryption v2 */
 	btdev->commands[61] |= BIT(7);	/* LE Read Maximum Data Length v2 */
 	btdev->commands[62] |= BIT(2);	/* LE Set Data Length v2 */
 	btdev->commands[63] |= BIT(0);	/* LE Set CIG Parameters v3 */
@@ -8548,7 +8606,7 @@ static void set_bredrle_features(struct btdev *btdev)
 		page_10[23] |= BIT(4); /* Transmit HDT6 */
 		page_10[23] |= BIT(5); /* Receive HDT6 */
 		page_10[23] |= BIT(6); /* Higher Data Throuhput */
-		page_10[23] |= BIT(7); /* PF1 */
+		page_10[23] |= BIT(7); /* Encryption Key Schedule */
 	}
 
 	btdev->feat_page_2[0] |= 0x01;	/* CPB - Central Operation */

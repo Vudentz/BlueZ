@@ -2900,7 +2900,7 @@ static const struct bitfield_data features_le_10[] = {
 	{ 188, "Transmit HDT6 Rate"				},
 	{ 189, "Receive HDT6 Rate"				},
 	{ 190, "Higher Data Throughput"				},
-	{ 191, "PF1"						},
+	{ 191, "Encryption Key Schedule"			},
 	{ }
 };
 
