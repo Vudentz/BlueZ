@@ -2880,6 +2880,7 @@ static const struct bitfield_data features_le_0[] = {
 	{ 46, "Channel Sounding"				},
 	{ 47, "Channel Sounding (Host Support)"			},
 	{ 48, "Channel Sounding Tone Quality Indication"	},
+	{ 59, "Higher Data Throughput (Intel)"			},
 	{ 63, "LL Extended Feature Set"				},
 	{ }
 };

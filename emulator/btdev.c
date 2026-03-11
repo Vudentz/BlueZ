@@ -8593,6 +8593,7 @@ static void set_bredrle_features(struct btdev *btdev)
 		uint8_t *page_10 = &btdev->le_features[9 * 24 + 8];
 
 		btdev->version = 0x10;
+		btdev->le_features[7] |= BIT(3); /* HDT Intel */
 
 		/* TODO: Update the features bits to the correct page once
 		 * their final value is known.
