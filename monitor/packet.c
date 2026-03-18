@@ -9834,6 +9834,53 @@ static void le_fsu_cmd(uint16_t index, const void *data, uint8_t size)
 	print_fsu_types(cmd->types);
 }
 
+static void print_le_def_phys(uint8_t phys)
+{
+	const char *str;
+
+	switch (phys) {
+	case 0x00:
+		str = "All GFSK";
+		break;
+	case 0x01:
+		str = "HDT";
+		break;
+	default:
+		str = "RFU";
+		break;
+	}
+
+	print_field("PHYs: %s (0x%2.2x)", str, phys);
+}
+
+static void le_write_def_data_len_v2(uint16_t index, const void *data,
+							uint8_t size)
+{
+	const struct bt_hci_cmd_le_write_def_data_len_v2 *cmd = data;
+
+	print_field("TX octets: %d", le16_to_cpu(cmd->tx_len));
+	print_field("TX time: %d", le16_to_cpu(cmd->tx_time));
+	print_le_def_phys(cmd->phys);
+}
+
+static void le_read_def_data_len_v2(uint16_t index, const void *data,
+					uint8_t size)
+{
+	const struct bt_hci_cmd_le_read_def_data_len_v2 *cmd = data;
+
+	print_le_def_phys(cmd->phys);
+}
+
+static void le_read_def_data_len_v2_rsp(uint16_t index, const void *data,
+					uint8_t size)
+{
+	const struct bt_hci_rsp_le_read_def_data_len_v2 *rsp = data;
+
+	print_status(rsp->status);
+	print_field("TX octets: %d", le16_to_cpu(rsp->tx_len));
+	print_field("TX time: %d", le16_to_cpu(rsp->tx_time));
+}
+
 static void print_prefer_mic_len(uint8_t mic_len)
 {
 	const char *str;
@@ -11379,6 +11426,20 @@ static const struct opcode_data opcode_table[] = {
 				"LE Frame Space Update", le_fsu_cmd,
 				sizeof(struct bt_hci_cmd_le_fsu),
 				true, status_rsp, 1, true },
+	{ BT_HCI_CMD_LE_WRITE_DEF_DATA_LEN_V2,
+			BT_HCI_BIT_LE_WRITE_DEF_DATA_LEN_V2,
+			"LE Write Suggested Default Data Length V2",
+			le_write_def_data_len_v2,
+			sizeof(struct bt_hci_cmd_le_write_def_data_len_v2),
+			true, status_rsp, 1, true },
+	{ BT_HCI_CMD_LE_READ_DEF_DATA_LEN_V2,
+			BT_HCI_BIT_LE_READ_DEF_DATA_LEN_V2,
+			"LE Read Suggested Default Data Length v2",
+			le_read_def_data_len_v2,
+			sizeof(struct bt_hci_cmd_le_read_def_data_len_v2),
+			true, le_read_def_data_len_v2_rsp,
+			sizeof(struct bt_hci_rsp_le_read_def_data_len_v2),
+			true },
 	{ BT_HCI_CMD_LE_ENABLE_ENCRYPT_V2, BT_HCI_BIT_LE_ENABLE_ENCRYPT_V2,
 				"LE Enable Encryption v2", le_enable_encrypt_v2,
 				sizeof(struct bt_hci_cmd_le_enable_encrypt_v2),

@@ -3294,6 +3294,26 @@ struct bt_hci_cmd_le_fsu {
 	uint8_t  types;
 } __attribute__ ((packed));
 
+#define BT_HCI_CMD_LE_WRITE_DEF_DATA_LEN_V2	cmd_opcode_pack(0x3e, 0x03dd)
+#define BT_HCI_BIT_LE_WRITE_DEF_DATA_LEN_V2	BT_HCI_CMD_BIT(0x3b, 1)
+struct bt_hci_cmd_le_write_def_data_len_v2 {
+	uint16_t tx_len;
+	uint16_t tx_time;
+	uint8_t  phys;
+} __attribute__ ((packed));
+
+#define BT_HCI_CMD_LE_READ_DEF_DATA_LEN_V2	cmd_opcode_pack(0x3e, 0x03de)
+#define BT_HCI_BIT_LE_READ_DEF_DATA_LEN_V2	BT_HCI_CMD_BIT(0x3b, 0)
+struct bt_hci_cmd_le_read_def_data_len_v2 {
+	uint8_t  phys;
+} __attribute__ ((packed));
+
+struct bt_hci_rsp_le_read_def_data_len_v2 {
+	uint8_t  status;
+	uint16_t tx_len;
+	uint16_t tx_time;
+} __attribute__ ((packed));
+
 #define BT_HCI_CMD_LE_ENABLE_ENCRYPT_V2		cmd_opcode_pack(0x3e, 0x03e6)
 #define BT_HCI_BIT_LE_ENABLE_ENCRYPT_V2		BT_HCI_CMD_BIT(0x3c, 0)
 struct bt_hci_cmd_le_enable_encrypt_v2 {
