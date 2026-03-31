@@ -1,6 +1,5 @@
 name: New issue
 description: Report a bug or other problem
-title: ''
 labels: []
 body:
   - type: textarea
