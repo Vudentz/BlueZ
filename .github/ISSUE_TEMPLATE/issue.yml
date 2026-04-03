@@ -62,6 +62,7 @@ body:
         - L2CAP channel issues
         - Advertising / Scanning
         - Disconnection analysis
+        - Channel Sounding
     validations:
       required: false
 
