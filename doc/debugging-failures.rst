@@ -1,4 +1,4 @@
-.. This file is included by btmon.rst.
+.. This file is included by debugging.rst.
 
 COMMON FAILURE PATTERNS
 ========================
