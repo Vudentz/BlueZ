@@ -773,19 +773,6 @@ PROTOCOL FLOWS
 
 .. include:: btmon-mgmt.rst
 
-DEBUGGING GUIDE
-===============
-
-.. include:: btmon-debugging.rst
-
-.. include:: btmon-tools.rst
-
-.. include:: btmon-failures.rst
-
-.. include:: btmon-cross-layer.rst
-
-.. include:: btmon-exercises.rst
-
 EXAMPLES
 ========
 
